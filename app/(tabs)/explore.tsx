@@ -1,102 +1,155 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Alert } from 'react-native';
+import { TextInput, Button, ActivityIndicator, Surface, HelperText } from 'react-native-paper';
+import * as Animatable from 'react-native-animatable';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { NavigationProp } from '@react-navigation/native';
+import { getPrediction } from "@/components/services/predictionService"; // Removed .tsx extension
+import Toast from 'react-native-toast-message'; // Import Toast
 
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={<Ionicons size={310} name="code-slash" style={styles.headerImage} />}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText> library
-          to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
+interface InputScreenProps {
+  navigation: NavigationProp<any>;
 }
 
+const explore: React.FC<InputScreenProps> = ({ navigation }) => {
+  const [inputs, setInputs] = useState<{
+    solarRadiation: string;
+    humidity: string;
+    conductivity: string;
+    phosphorous: string;
+    pHValue: string;
+    temperature: string;
+    nitrogen: string;
+    potassium: string;
+  }>({
+    solarRadiation: '',
+    humidity: '',
+    conductivity: '',
+    phosphorous: '',
+    pHValue: '',
+    temperature: '',
+    nitrogen: '',
+    potassium: '',
+  });
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const prediction = await getPrediction(inputs);
+      if (prediction) {
+        navigation.navigate('outputScreen', { prediction }); // Ensure the correct screen name is used
+      } else {
+        // Show toast message when no prediction is received
+        Toast.show({
+          text1: 'No Prediction Received',
+          text2: 'Please check your input values and try again.',
+          type: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Prediction error:', error);
+      // Show alert for prediction error
+      Alert.alert('Prediction Error', 'An error occurred while fetching the prediction. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getGuideline = (key: keyof typeof inputs): string => {
+    const guidelines: Record<string, string> = {
+      solarRadiation: 'Value in kWh/m², range: 0-1000',
+      humidity: 'Percentage, range: 0-100%',
+      conductivity: 'mS/cm, range: 0-10',
+      phosphorous: 'mg/L, range: 0-50',
+      pHValue: 'Value, range: 0-14',
+      temperature: 'Temperature in °C',
+      nitrogen: 'mg/L, range: 0-100',
+      potassium: 'mg/L, range: 0-100',
+    };
+    return guidelines[key] || 'Please enter a valid value';
+  };
+
+  const hasErrors = (value: string): boolean => {
+    return value === ''; // A simple check for empty input
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Animatable.View animation="fadeInUp" duration={1000}>
+        <Surface style={styles.surface}>
+          {Object.keys(inputs).map((key, index) => (
+            <Animatable.View key={key} animation="fadeInLeft" delay={index * 100}>
+              <TextInput
+                label={key.charAt(0).toUpperCase() + key.slice(1)}
+                value={inputs[key as keyof typeof inputs]}
+                onChangeText={(text) => setInputs({ ...inputs, [key]: text })}
+                style={styles.input}
+                mode="outlined"
+                placeholder={getGuideline(key as keyof typeof inputs)}
+              />
+              <HelperText type="info" visible={true} style={styles.helperText}>
+                {getGuideline(key as keyof typeof inputs)}
+              </HelperText>
+              <HelperText type="error" visible={hasErrors(inputs[key as keyof typeof inputs])}>
+                {inputs[key as keyof typeof inputs] === '' && `Please provide a valid ${key}`}
+              </HelperText>
+            </Animatable.View>
+          ))}
+          <Button
+            mode="contained"
+            onPress={handleSubmit}
+            style={styles.button}
+            disabled={loading}
+          >
+            {loading ? <ActivityIndicator animating={true} color="#fff" /> : 'Predict'}
+          </Button>
+        </Surface>
+      </Animatable.View>
+      
+    </ScrollView>
+  );
+};
+
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    padding: 20,
+    backgroundColor: '#F4F6F7',
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  surface: {
+    padding: 20,
+    borderRadius: 15,
+    elevation: 5,
+    backgroundColor: '#fff',
+  },
+  input: {
+    marginBottom: 5,
+    backgroundColor: '#FFF',
+  },
+  button: {
+    marginTop: 20,
+    backgroundColor: '#8E44AD',
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#7F8C8D',
   },
 });
+
+export default explore;
+
+
+
+// import React from 'react';
+// import { View, Text } from 'react-native';
+
+// const explore = () => {
+//   return (
+//     <View>
+//       <Text>This is the Input Screen.</Text>
+//     </View>
+//   );
+// };
+
+// export default explore;
