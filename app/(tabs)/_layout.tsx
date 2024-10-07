@@ -15,7 +15,7 @@ export default function TabLayout() {
         headerShown: false,
       }}>
       <Tabs.Screen
-        name="index"
+        name="index" // index.tsx
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
@@ -24,7 +24,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="explore" // explore.tsx
         options={{
           title: 'Explore',
           tabBarIcon: ({ color, focused }) => (
@@ -32,6 +32,25 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="history" // history.tsx
+        options={{
+          title: 'History',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile" // profile.tsx
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
+          ),
+        }}
+      />
     </Tabs>
+    
   );
 }
