@@ -22,7 +22,7 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     const fetchWeatherData = async () => {
       try {
-        const response = await fetch('https://weatherapi-com.p.rapidapi.com/current.json?q=53.1%2C-0.13', {
+        const response = await fetch('https://weatherapi-com.p.rapidapi.com/current.json?q=12.9716%2C77.5946', { // Updated to Bengaluru coordinates
           method: 'GET',
           headers: {
             'x-rapidapi-host': 'weatherapi-com.p.rapidapi.com',
