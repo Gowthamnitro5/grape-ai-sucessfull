@@ -9,7 +9,7 @@ const HomeScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Icon name="grape" size={40} color="#8E44AD" />
+        {/* <Icon name="grape" size={40} color="#8E44AD" /> */}
         <Text style={styles.title}>Grapeai</Text>
       </View>
 
