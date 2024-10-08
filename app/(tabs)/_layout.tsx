@@ -1,56 +1,33 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Explore from "./explore";
+import HistoryScreen from "./history";
+import HomeScreen from "./home";
+import Profile from "./profile";
+const Tab = createBottomTabNavigator();
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-      }}>
-      <Tabs.Screen
-        name="index" // index.tsx
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
-          ),
-        }}
+    <Tab.Navigator>
+      <Tab.Screen
+        name="explore"
+        component={Explore}
+        options={{ headerShown: false }}
       />
-      <Tabs.Screen
-        name="explore" // explore.tsx
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
-          ),
-        }}
+      <Tab.Screen
+        name="history"
+        component={HistoryScreen}
+        options={{ headerShown: false }}
       />
-      <Tabs.Screen
-        name="history" // history.tsx
-        options={{
-          title: 'History',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
-          ),
-        }}
+      <Tab.Screen
+        name="home"
+        component={HomeScreen}
+        options={{ headerShown: false }}
       />
-      <Tabs.Screen
-        name="profile" // profile.tsx
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
-          ),
-        }}
+      <Tab.Screen
+        name="profile"
+        component={Profile}
+        options={{ headerShown: false }}
       />
-    </Tabs>
-    
+    </Tab.Navigator>
   );
 }

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Image, Alert } from 'react-native';
-import { Text, Card, TextInput, Button } from 'react-native-paper';
-import { Picker } from '@react-native-picker/picker';
-import * as Location from 'expo-location';
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, ScrollView, Image, Alert } from "react-native";
+import { Text, Card, TextInput, Button } from "react-native-paper";
+import { Picker } from "@react-native-picker/picker";
+import * as Location from "expo-location";
 
 interface UserProfile {
   name: string;
@@ -21,31 +21,31 @@ interface UserProfile {
 }
 
 const initialUserProfile: UserProfile = {
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  phone: '123-456-7890',
-  address: '123 Main St, Anytown, USA',
-  soilType: '',
-  farmArea: '',
-  landRevenueSurveyNo: '',
+  name: "John Doe",
+  email: "john.doe@example.com",
+  phone: "123-456-7890",
+  address: "123 Main St, Anytown, USA",
+  soilType: "",
+  farmArea: "",
+  landRevenueSurveyNo: "",
   gpsLocation: {
-    latitude: '',
-    longitude: '',
+    latitude: "",
+    longitude: "",
   },
-  referralCode: '', // Initialize referral code
+  referralCode: "", // Initialize referral code
   predictionsCount: 0, // Initialize predictions count
 };
 
-
-const profile: React.FC = () => {
-  const [userProfile, setUserProfile] = useState<UserProfile>(initialUserProfile);
+const Profile: React.FC = () => {
+  const [userProfile, setUserProfile] =
+    useState<UserProfile>(initialUserProfile);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [locationPermission, setLocationPermission] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchLocation = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
+      if (status === "granted") {
         setLocationPermission(true);
         const location = await Location.getCurrentPositionAsync({});
         setUserProfile((prevProfile) => ({
@@ -56,7 +56,7 @@ const profile: React.FC = () => {
           },
         }));
       } else {
-        console.log('Location permission not granted');
+        console.log("Location permission not granted");
       }
     };
 
@@ -67,7 +67,7 @@ const profile: React.FC = () => {
     setUserProfile({ ...userProfile, [key]: value });
   };
 
-  const handleGpsChange = (key: 'latitude' | 'longitude', value: string) => {
+  const handleGpsChange = (key: "latitude" | "longitude", value: string) => {
     setUserProfile({
       ...userProfile,
       gpsLocation: { ...userProfile.gpsLocation, [key]: value },
@@ -79,22 +79,25 @@ const profile: React.FC = () => {
   };
 
   const handleSave = () => {
-    console.log('Updated Profile:', userProfile);
+    console.log("Updated Profile:", userProfile);
     setIsEditing(false);
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'You have been logged out successfully.');
+    Alert.alert("Logout", "You have been logged out successfully.");
   };
 
   const handleReferralSubmit = () => {
-    Alert.alert('Referral Code', `Referral code ${userProfile.referralCode} submitted.`);
+    Alert.alert(
+      "Referral Code",
+      `Referral code ${userProfile.referralCode} submitted.`
+    );
   };
 
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: '@/assets/images/grappy' }} // Replace with your image URL
+        source={{ uri: "@/assets/images/grappy" }} // Replace with your image URL
         style={styles.image}
       />
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -102,16 +105,24 @@ const profile: React.FC = () => {
           <Card.Content>
             <Text style={styles.title}>{userProfile.name}</Text>
             <Text style={styles.detail}>Email: {userProfile.email}</Text>
-            {userProfile.phone && <Text style={styles.detail}>Phone: {userProfile.phone}</Text>}
-            {userProfile.address && <Text style={styles.detail}>Address: {userProfile.address}</Text>}
-            <Text style={styles.detail}>Predictions Count: {userProfile.predictionsCount}</Text>
+            {userProfile.phone && (
+              <Text style={styles.detail}>Phone: {userProfile.phone}</Text>
+            )}
+            {userProfile.address && (
+              <Text style={styles.detail}>Address: {userProfile.address}</Text>
+            )}
+            <Text style={styles.detail}>
+              Predictions Count: {userProfile.predictionsCount}
+            </Text>
 
             {/* Editable Fields */}
             {isEditing ? (
               <>
                 <Picker
                   selectedValue={userProfile.soilType}
-                  onValueChange={(itemValue) => handleInputChange('soilType', itemValue)}
+                  onValueChange={(itemValue) =>
+                    handleInputChange("soilType", itemValue)
+                  }
                   style={styles.picker}
                 >
                   <Picker.Item label="Select Soil Type" value="" />
@@ -128,59 +139,88 @@ const profile: React.FC = () => {
                 <TextInput
                   label="Area of Farm (in acres)"
                   value={userProfile.farmArea}
-                  onChangeText={(text) => handleInputChange('farmArea', text)}
+                  onChangeText={(text) => handleInputChange("farmArea", text)}
                   style={styles.input}
                   keyboardType="numeric"
                 />
                 <TextInput
                   label="Land Revenue Survey No"
                   value={userProfile.landRevenueSurveyNo}
-                  onChangeText={(text) => handleInputChange('landRevenueSurveyNo', text)}
+                  onChangeText={(text) =>
+                    handleInputChange("landRevenueSurveyNo", text)
+                  }
                   style={styles.input}
                 />
                 <TextInput
                   label="GPS Latitude"
                   value={userProfile.gpsLocation.latitude}
-                  onChangeText={(text) => handleGpsChange('latitude', text)}
+                  onChangeText={(text) => handleGpsChange("latitude", text)}
                   style={styles.input}
                   keyboardType="numeric"
                 />
                 <TextInput
                   label="GPS Longitude"
                   value={userProfile.gpsLocation.longitude}
-                  onChangeText={(text) => handleGpsChange('longitude', text)}
+                  onChangeText={(text) => handleGpsChange("longitude", text)}
                   style={styles.input}
                   keyboardType="numeric"
                 />
                 <TextInput
                   label="Referral Code"
                   value={userProfile.referralCode}
-                  onChangeText={(text) => handleInputChange('referralCode', text)}
+                  onChangeText={(text) =>
+                    handleInputChange("referralCode", text)
+                  }
                   style={styles.input}
                 />
-                <Button mode="contained" onPress={handleReferralSubmit} style={styles.button}>
+                <Button
+                  mode="contained"
+                  onPress={handleReferralSubmit}
+                  style={styles.button}
+                >
                   Submit Referral
                 </Button>
-                <Button mode="contained" onPress={handleSave} style={styles.button}>
+                <Button
+                  mode="contained"
+                  onPress={handleSave}
+                  style={styles.button}
+                >
                   Save
                 </Button>
               </>
             ) : (
               <>
-                <Text style={styles.detail}>Soil Type: {userProfile.soilType || 'Not provided'}</Text>
-                <Text style={styles.detail}>Farm Area: {userProfile.farmArea || 'Not provided'} acres</Text>
-                <Text style={styles.detail}>Land Revenue Survey No: {userProfile.landRevenueSurveyNo || 'Not provided'}</Text>
                 <Text style={styles.detail}>
-                  GPS Location: {userProfile.gpsLocation.latitude && userProfile.gpsLocation.longitude 
-                    ? `${userProfile.gpsLocation.latitude}, ${userProfile.gpsLocation.longitude}` 
-                    : 'Not provided'}
+                  Soil Type: {userProfile.soilType || "Not provided"}
                 </Text>
-                <Button mode="outlined" onPress={handleEditToggle} style={styles.button}>
+                <Text style={styles.detail}>
+                  Farm Area: {userProfile.farmArea || "Not provided"} acres
+                </Text>
+                <Text style={styles.detail}>
+                  Land Revenue Survey No:{" "}
+                  {userProfile.landRevenueSurveyNo || "Not provided"}
+                </Text>
+                <Text style={styles.detail}>
+                  GPS Location:{" "}
+                  {userProfile.gpsLocation.latitude &&
+                  userProfile.gpsLocation.longitude
+                    ? `${userProfile.gpsLocation.latitude}, ${userProfile.gpsLocation.longitude}`
+                    : "Not provided"}
+                </Text>
+                <Button
+                  mode="outlined"
+                  onPress={handleEditToggle}
+                  style={styles.button}
+                >
                   Edit
                 </Button>
               </>
             )}
-            <Button mode="outlined" onPress={handleLogout} style={styles.button}>
+            <Button
+              mode="outlined"
+              onPress={handleLogout}
+              style={styles.button}
+            >
               Logout
             </Button>
           </Card.Content>
@@ -195,9 +235,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 200, // Adjust height as needed
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   scrollViewContent: {
     paddingTop: 200, // Adjust to prevent content from hiding behind the image
@@ -210,7 +250,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   detail: {
     fontSize: 16,
@@ -221,7 +261,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
-    width: '100%',
+    width: "100%",
     marginVertical: 10,
   },
   button: {
@@ -229,8 +269,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default profile;
-
+export default Profile;
 
 // import React from 'react';
 // import { View, Text } from 'react-native';
