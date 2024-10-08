@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Alert } from 'react-native';
-import { TextInput, Button, ActivityIndicator, Surface, HelperText } from 'react-native-paper';
-import * as Animatable from 'react-native-animatable';
+import { ScrollView, StyleSheet, Alert, View, useWindowDimensions } from 'react-native';
+import { TextInput, Button, ActivityIndicator, Surface, HelperText, useTheme } from 'react-native-paper';
 
 import { NavigationProp } from '@react-navigation/native';
-import { getPrediction } from "@/components/services/predictionService"; // Removed .tsx extension
-import Toast from 'react-native-toast-message'; // Import Toast
+import { getPrediction } from "@/components/services/predictionService";
+import Toast from 'react-native-toast-message';
 
 interface InputScreenProps {
   navigation: NavigationProp<any>;
 }
 
-const explore: React.FC<InputScreenProps> = ({ navigation }) => {
+const Explore: React.FC<InputScreenProps> = ({ navigation }) => {
+  const { width } = useWindowDimensions();
+  const theme = useTheme();
+
   const [inputs, setInputs] = useState<{
     solarRadiation: string;
     humidity: string;
@@ -39,9 +41,8 @@ const explore: React.FC<InputScreenProps> = ({ navigation }) => {
     try {
       const prediction = await getPrediction(inputs);
       if (prediction) {
-        navigation.navigate('outputScreen', { prediction }); // Ensure the correct screen name is used
+        navigation.navigate('outputScreen', { prediction });
       } else {
-        // Show toast message when no prediction is received
         Toast.show({
           text1: 'No Prediction Received',
           text2: 'Please check your input values and try again.',
@@ -50,7 +51,6 @@ const explore: React.FC<InputScreenProps> = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Prediction error:', error);
-      // Show alert for prediction error
       Alert.alert('Prediction Error', 'An error occurred while fetching the prediction. Please try again.');
     } finally {
       setLoading(false);
@@ -72,31 +72,38 @@ const explore: React.FC<InputScreenProps> = ({ navigation }) => {
   };
 
   const hasErrors = (value: string): boolean => {
-    return value === ''; // A simple check for empty input
+    return value === '';
   };
 
+  const isSmallScreen = width < 600;
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Animatable.View animation="fadeInUp" duration={1000}>
-        <Surface style={styles.surface}>
-          {Object.keys(inputs).map((key, index) => (
-            <Animatable.View key={key} animation="fadeInLeft" delay={index * 100}>
-              <TextInput
-                label={key.charAt(0).toUpperCase() + key.slice(1)}
-                value={inputs[key as keyof typeof inputs]}
-                onChangeText={(text) => setInputs({ ...inputs, [key]: text })}
-                style={styles.input}
-                mode="outlined"
-                placeholder={getGuideline(key as keyof typeof inputs)}
-              />
-              <HelperText type="info" visible={true} style={styles.helperText}>
-                {getGuideline(key as keyof typeof inputs)}
-              </HelperText>
-              <HelperText type="error" visible={hasErrors(inputs[key as keyof typeof inputs])}>
-                {inputs[key as keyof typeof inputs] === '' && `Please provide a valid ${key}`}
-              </HelperText>
-            </Animatable.View>
-          ))}
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={styles.formContainer}>
+        <Surface style={[styles.surface, { width: isSmallScreen ? '100%' : '80%', maxWidth: 800 }]}>
+          <View style={styles.inputsContainer}>
+            {Object.keys(inputs).map((key, index) => (
+              <View 
+                key={key} 
+                style={[styles.inputWrapper, isSmallScreen ? styles.fullWidth : styles.halfWidth]}
+              >
+                <TextInput
+                  label={key.charAt(0).toUpperCase() + key.slice(1)}
+                  value={inputs[key as keyof typeof inputs]}
+                  onChangeText={(text) => setInputs({ ...inputs, [key]: text })}
+                  style={styles.input}
+                  mode="outlined"
+                  placeholder={getGuideline(key as keyof typeof inputs)}
+                />
+                <HelperText type="info" visible={true} style={styles.helperText}>
+                  {getGuideline(key as keyof typeof inputs)}
+                </HelperText>
+                <HelperText type="error" visible={hasErrors(inputs[key as keyof typeof inputs])}>
+                  {inputs[key as keyof typeof inputs] === '' && `Please provide a valid ${key}`}
+                </HelperText>
+              </View>
+            ))}
+          </View>
           <Button
             mode="contained"
             onPress={handleSubmit}
@@ -106,50 +113,51 @@ const explore: React.FC<InputScreenProps> = ({ navigation }) => {
             {loading ? <ActivityIndicator animating={true} color="#fff" /> : 'Predict'}
           </Button>
         </Surface>
-      </Animatable.View>
-      
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flexGrow: 1,
     padding: 20,
-    backgroundColor: '#F4F6F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  formContainer: {
+    width: '100%',
+    alignItems: 'center',
   },
   surface: {
     padding: 20,
     borderRadius: 15,
     elevation: 5,
-    backgroundColor: '#fff',
+  },
+  inputsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  inputWrapper: {
+    marginBottom: 15,
+  },
+  fullWidth: {
+    width: '100%',
+  },
+  halfWidth: {
+    width: '48%',
   },
   input: {
     marginBottom: 5,
-    backgroundColor: '#FFF',
   },
   button: {
     marginTop: 20,
-    backgroundColor: '#8E44AD',
+    paddingVertical: 8,
   },
   helperText: {
     fontSize: 12,
-    color: '#7F8C8D',
   },
 });
 
-export default explore;
-
-
-
-// import React from 'react';
-// import { View, Text } from 'react-native';
-
-// const explore = () => {
-//   return (
-//     <View>
-//       <Text>This is the Input Screen.</Text>
-//     </View>
-//   );
-// };
-
-// export default explore;
+export default Explore;
