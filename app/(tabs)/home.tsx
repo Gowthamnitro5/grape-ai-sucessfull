@@ -6,10 +6,10 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 
-const HomeScreen: React.FC = () => {
+const HomeScreen: React.FC = ({ navigation }: any) => {
   const { width } = useWindowDimensions();
   const isLargeScreen = width > 768;
-  const navigation = useNavigation();
+  
 
   const [weatherData, setWeatherData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -21,10 +21,6 @@ const HomeScreen: React.FC = () => {
   ]);
   const [vineyardHealth, setVineyardHealth] = useState(85);
   const [tipOfTheDay, setTipOfTheDay] = useState('Ensure proper air circulation in your vineyard to prevent fungal diseases.');
-
-  const handleNavigateToExplore = () => {
-    navigation.navigate('Explore' as never);
-  };
 
   const toggleTask = (id: number) => {
     setTasks(tasks.map(task => 
@@ -106,9 +102,10 @@ const HomeScreen: React.FC = () => {
               </Paragraph>
               <Button 
                 mode="contained" 
-                onPress={handleNavigateToExplore}
+                onPress={ () => navigation.navigate('Prediction')}
                 style={styles.predictButton}
                 icon="camera"
+              
               >
                 Start Prediction
               </Button>
