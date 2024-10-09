@@ -18,7 +18,7 @@ type Props = {
   route: OutputScreenRouteProp;
 };
 
-const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
+const OutputScreen = ({ route, navigation }:any) => {
   const { prediction } = route.params; // Ensure prediction is received
 
   // Use the received prediction data instead of dummy data
@@ -49,7 +49,7 @@ const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
                 <Title>Pest Attack Probabilities</Title>
                 {Object.entries(predictions.pestAttacks).map(([pest, probability], index) => (
                   <Animatable.View key={pest} animation="fadeInLeft" delay={index * 100}>
-                    <Paragraph>{pest}: {probability}</Paragraph>
+                    <Paragraph>{pest}: {(parseFloat(probability as string) * 100).toFixed(2)}%</Paragraph> {/* Convert to percentage */}
                   </Animatable.View>
                 ))}
               </Card.Content>

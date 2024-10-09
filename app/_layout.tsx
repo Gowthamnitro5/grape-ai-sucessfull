@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import TabLayout from "./(tabs)/_layout";
 import Auth from "./auth";
 import SplashScreen from "./SplashScreen";
+import OutputScreen from "./output";
 
 export default function RootLayout() {
   const Stack = createNativeStackNavigator();
@@ -27,6 +28,11 @@ export default function RootLayout() {
       <Stack.Screen
         name="SplashScreen"
         component={SplashScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="output"
+        component={OutputScreen}
         options={{ headerShown: false }}
       />
       

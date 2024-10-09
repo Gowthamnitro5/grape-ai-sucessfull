@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { Text, Card, TextInput, Button, useTheme } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
-import * as Location from "expo-location";
 import { useLocation } from "@/components/services/DataService";
 
 interface UserProfile {

@@ -57,7 +57,7 @@ const SplashScreen  = ({ navigation } : any) => {
 
       {/* Footer Text */}
       <Animatable.View animation="fadeInUp" delay={1000} duration={1500} style={styles.footerTextContainer}>
-        <Text style={styles.footerText}>All copyright's reserved</Text>
+        <Text style={styles.footerText}>© All copyright's reserved</Text>
       </Animatable.View>
     </View>
   );

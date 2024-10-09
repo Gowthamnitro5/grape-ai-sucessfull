@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "command": "npx expo start --tunnel",
+      "command": "npx expo start --android",
       "name": "Expo- Tunnel",
       "request": "launch",
       "type": "node-terminal"

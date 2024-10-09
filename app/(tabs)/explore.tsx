@@ -41,7 +41,8 @@ const Explore: React.FC<InputScreenProps> = ({ navigation }) => {
     try {
       const prediction = await getPrediction(inputs);
       if (prediction) {
-        navigation.navigate('outputScreen', { prediction });
+        console.log(prediction);
+        navigation.navigate('output', { prediction });
       } else {
         Toast.show({
           text1: 'No Prediction Received',

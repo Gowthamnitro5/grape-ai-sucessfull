@@ -57,7 +57,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
 
   const dynamicStyles = StyleSheet.create({
     container: {
-      padding: isLargeScreen ? 20 : 10,
+      flex: 1, // Ensure the container covers the full page
     },
     cardContainer: {
       flexDirection: isLargeScreen ? 'row' : 'column',
@@ -65,17 +65,17 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
       justifyContent: 'space-between',
     },
     card: {
+      borderRadius: 15,
+      elevation: 4,
+      padding: 10,
       width: isLargeScreen ? '48%' : '100%',
       marginBottom: 15,
     },
-    blogCardContainer: {
-      flexDirection: isLargeScreen ? 'row' : 'column',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-    },
     blogCard: {
-      width: isLargeScreen ? '31%' : '100%',
-      marginBottom: 15,
+      borderRadius: 15,
+      elevation: 4,
+      padding: 10,
+      width: isLargeScreen ? '28%' : '80%', // Adjust width for carousel effect
     },
   });
 
@@ -89,7 +89,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
           <Text style={styles.title}>GrapeAI</Text>
         </View>
 
-        <Card style={[styles.card, dynamicStyles.card, styles.grapeaiCard]}>
+        <Card style={[dynamicStyles.card, styles.grapeaiCard]}>
           <ImageBackground
             source={{ uri: 'https://picsum.photos/seed/grapes/400/200' }}
             style={styles.cardBackground}
@@ -105,7 +105,6 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
                 onPress={ () => navigation.navigate('Prediction')}
                 style={styles.predictButton}
                 icon="camera"
-              
               >
                 Start Prediction
               </Button>
@@ -114,7 +113,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
         </Card>
 
         <View style={dynamicStyles.cardContainer}>
-          <Card style={[styles.card, dynamicStyles.card, styles.weatherCard]}>
+          <Card style={[dynamicStyles.card, styles.weatherCard]}>
             <Card.Content>
               <Title style={styles.cardTitle}>Weather Data</Title>
               <View style={styles.weatherInfo}>
@@ -142,7 +141,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
             </Card.Content>
           </Card>
 
-          <Card style={[styles.card, dynamicStyles.card, styles.predictionCard]}>
+          <Card style={[dynamicStyles.card, styles.predictionCard]}>
             <Card.Content>
               <Title style={styles.cardTitle}>Previous Prediction</Title>
               <View style={styles.predictionInfo}>
@@ -158,7 +157,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
           </Card>
         </View>
 
-        <Card style={[styles.card, styles.taskCard]}>
+        <Card style={[dynamicStyles.card, styles.taskCard]}>
           <Card.Content>
             <Title style={styles.cardTitle}>Today's Tasks</Title>
             <List.Section>
@@ -183,7 +182,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
         </Card>
 
         <View style={dynamicStyles.cardContainer}>
-          <Card style={[styles.card, dynamicStyles.card, styles.healthCard]}>
+          <Card style={[dynamicStyles.card, styles.healthCard]}>
             <Card.Content>
               <Title style={styles.cardTitle}>Vineyard Health</Title>
               <View style={styles.healthMeter}>
@@ -207,7 +206,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
             </Card.Content>
           </Card>
 
-          <Card style={[styles.card, dynamicStyles.card, styles.tipCard]}>
+          <Card style={[dynamicStyles.card, styles.tipCard]}>
             <Card.Content>
               <Title style={styles.cardTitle}>Tip of the Day</Title>
               <View style={styles.tipContent}>
@@ -219,9 +218,9 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
         </View>
 
         <Title style={styles.sectionTitle}>Latest Insights</Title>
-        <View style={dynamicStyles.blogCardContainer}>
+        <View style={dynamicStyles.cardContainer}>
           {[1, 2, 3].map((blog) => (
-            <Card key={blog} style={[styles.card, dynamicStyles.blogCard, styles.insightCard]}>
+            <Card key={blog} style={[dynamicStyles.blogCard, styles.insightCard]}>
               <Card.Cover source={{ uri: `https://picsum.photos/seed/grape${blog}/300/200` }} />
               <Card.Content>
                 <Title style={styles.insightTitle}>Grape Insight {blog}</Title>
@@ -274,6 +273,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 15,
     elevation: 4,
+    padding: 10,
   },
   cardBackground: {
     overflow: 'hidden',
