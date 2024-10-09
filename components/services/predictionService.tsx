@@ -1,3 +1,5 @@
+import { View,Text } from "react-native";
+
 // This is a mock prediction service. In a real application, you'd send the data to your backend API.
 export const getPrediction = async (inputs: any) => { // Specify the type of inputs
     // Simulate API call delay
@@ -40,22 +42,23 @@ export const getPrediction = async (inputs: any) => { // Specify the type of inp
         const data = await response.json();
 
         // Ensure the response contains the expected keys
-        if (!data.predicted_disease || !data.predicted_pest_attacks) {
-            console.error('Invalid response structure from the backend');
-            return null;
+        if (!data || !data.predicted_disease || !data.predicted_pest_attacks) { // Added check for 'data'
+            console.error('Invalid response structure from the backend', data);
+            return null; // Return null if the response is not valid
         }
 
-        return {
-            disease: data['predicted_disease'],
-            pestAttacks: {
-                'Flea Beetle': data['predicted_pest_attacks']['Flea Beetle'] || 0,
-                'Thrips': data['predicted_pest_attacks']['Thrips'] || 0,
-                'MealyBug': data['predicted_pest_attacks']['Mealybug'] || 0,
-                'Jassids': data['predicted_pest_attacks']['Jassids'] || 0,
-                'Red Spider Mites': data['predicted_pest_attacks']['Red-Spider Mites'] || 0,
-                'Leaf Eating Caterpillar': data['predicted_pest_attacks']['Leaf Eating Caterpillar'] || 0,
-            },
-        };
+        return (
+            <View>
+                <Text>Disease: {data['predicted_disease']}</Text>
+                <Text>Pest Attacks:</Text>
+                <Text>Flea Beetle: {data['predicted_pest_attacks']['Flea Beetle'] || 0}</Text>
+                <Text>Thrips: {data['predicted_pest_attacks']['Thrips'] || 0}</Text>
+                <Text>Mealybug: {data['predicted_pest_attacks']['Mealybug'] || 0}</Text>
+                <Text>Jassids: {data['predicted_pest_attacks']['Jassids'] || 0}</Text>
+                <Text>Red Spider Mites: {data['predicted_pest_attacks']['Red-Spider Mites'] || 0}</Text>
+                <Text>Leaf Eating Caterpillar: {data['predicted_pest_attacks']['Leaf Eating Caterpillar'] || 0}</Text>
+            </View>
+        );
     } catch (err) {
         console.error('API call failed:', err);
         return null; // Return null in case of error
