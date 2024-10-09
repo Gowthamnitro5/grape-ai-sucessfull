@@ -1,8 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Image, Alert, useWindowDimensions } from 'react-native';
-import { Text, Card, TextInput, Button, useTheme } from 'react-native-paper';
-import { Picker } from '@react-native-picker/picker';
-import * as Location from 'expo-location';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Image,
+  Alert,
+  useWindowDimensions,
+} from "react-native";
+import { Text, Card, TextInput, Button, useTheme } from "react-native-paper";
+import { Picker } from "@react-native-picker/picker";
+import * as Location from "expo-location";
+import { useLocation } from "@/components/services/DataService";
 
 interface UserProfile {
   name: string;
@@ -36,34 +44,14 @@ const initialUserProfile: UserProfile = {
   predictionsCount: 0, // Initialize predictions count
 };
 
-const Profile: React.FC = () => {
+const Profile = () => {
   const [userProfile, setUserProfile] =
     useState<UserProfile>(initialUserProfile);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [locationPermission, setLocationPermission] = useState<boolean>(false);
   const { width } = useWindowDimensions();
   const theme = useTheme();
 
-  useEffect(() => {
-    const fetchLocation = async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === "granted") {
-        setLocationPermission(true);
-        const location = await Location.getCurrentPositionAsync({});
-        setUserProfile((prevProfile) => ({
-          ...prevProfile,
-          gpsLocation: {
-            latitude: location.coords.latitude.toString(),
-            longitude: location.coords.longitude.toString(),
-          },
-        }));
-      } else {
-        console.log("Location permission not granted");
-      }
-    };
-
-    fetchLocation();
-  }, []);
+  const { location } = useLocation(); // Get location from context
 
   const handleInputChange = (key: keyof UserProfile, value: string) => {
     setUserProfile({ ...userProfile, [key]: value });
@@ -101,22 +89,30 @@ const Profile: React.FC = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Image
-        source={{ uri: '@/assets/images/grappy' }}
+        source={{ uri: "@/assets/images/grappy" }}
         style={[styles.image, { height: isSmallScreen ? 150 : 200 }]}
       />
       <Card style={styles.card}>
         <Card.Content>
           <Text style={styles.title}>{userProfile.name}</Text>
           <Text style={styles.detail}>Email: {userProfile.email}</Text>
-          {userProfile.phone && <Text style={styles.detail}>Phone: {userProfile.phone}</Text>}
-          {userProfile.address && <Text style={styles.detail}>Address: {userProfile.address}</Text>}
-          <Text style={styles.detail}>Predictions Count: {userProfile.predictionsCount}</Text>
+          {userProfile.phone && (
+            <Text style={styles.detail}>Phone: {userProfile.phone}</Text>
+          )}
+          {userProfile.address && (
+            <Text style={styles.detail}>Address: {userProfile.address}</Text>
+          )}
+          <Text style={styles.detail}>
+            Predictions Count: {userProfile.predictionsCount}
+          </Text>
 
           {isEditing ? (
             <>
               <Picker
                 selectedValue={userProfile.soilType}
-                onValueChange={(itemValue) => handleInputChange('soilType', itemValue)}
+                onValueChange={(itemValue) =>
+                  handleInputChange("soilType", itemValue)
+                }
                 style={styles.picker}
               >
                 <Picker.Item label="Select Soil Type" value="" />
@@ -133,28 +129,30 @@ const Profile: React.FC = () => {
               <TextInput
                 label="Area of Farm (in acres)"
                 value={userProfile.farmArea}
-                onChangeText={(text) => handleInputChange('farmArea', text)}
+                onChangeText={(text) => handleInputChange("farmArea", text)}
                 style={styles.input}
                 keyboardType="numeric"
               />
               <TextInput
                 label="Land Revenue Survey No"
                 value={userProfile.landRevenueSurveyNo}
-                onChangeText={(text) => handleInputChange('landRevenueSurveyNo', text)}
+                onChangeText={(text) =>
+                  handleInputChange("landRevenueSurveyNo", text)
+                }
                 style={styles.input}
               />
               <View style={styles.row}>
                 <TextInput
                   label="GPS Latitude"
                   value={userProfile.gpsLocation.latitude}
-                  onChangeText={(text) => handleGpsChange('latitude', text)}
+                  onChangeText={(text) => handleGpsChange("latitude", text)}
                   style={[styles.input, styles.halfWidth]}
                   keyboardType="numeric"
                 />
                 <TextInput
                   label="GPS Longitude"
                   value={userProfile.gpsLocation.longitude}
-                  onChangeText={(text) => handleGpsChange('longitude', text)}
+                  onChangeText={(text) => handleGpsChange("longitude", text)}
                   style={[styles.input, styles.halfWidth]}
                   keyboardType="numeric"
                 />
@@ -162,27 +160,47 @@ const Profile: React.FC = () => {
               <TextInput
                 label="Referral Code"
                 value={userProfile.referralCode}
-                onChangeText={(text) => handleInputChange('referralCode', text)}
+                onChangeText={(text) => handleInputChange("referralCode", text)}
                 style={styles.input}
               />
-              <Button mode="contained" onPress={handleReferralSubmit} style={styles.button}>
+              <Button
+                mode="contained"
+                onPress={handleReferralSubmit}
+                style={styles.button}
+              >
                 Submit Referral
               </Button>
-              <Button mode="contained" onPress={handleSave} style={styles.button}>
+              <Button
+                mode="contained"
+                onPress={handleSave}
+                style={styles.button}
+              >
                 Save
               </Button>
             </>
           ) : (
             <>
-              <Text style={styles.detail}>Soil Type: {userProfile.soilType || 'Not provided'}</Text>
-              <Text style={styles.detail}>Farm Area: {userProfile.farmArea || 'Not provided'} acres</Text>
-              <Text style={styles.detail}>Land Revenue Survey No: {userProfile.landRevenueSurveyNo || 'Not provided'}</Text>
               <Text style={styles.detail}>
-                GPS Location: {userProfile.gpsLocation.latitude && userProfile.gpsLocation.longitude 
-                  ? `${userProfile.gpsLocation.latitude}, ${userProfile.gpsLocation.longitude}` 
-                  : 'Not provided'}
+                Soil Type: {userProfile.soilType || "Not provided"}
               </Text>
-              <Button mode="outlined" onPress={handleEditToggle} style={styles.button}>
+              <Text style={styles.detail}>
+                Farm Area: {userProfile.farmArea || "Not provided"} acres
+              </Text>
+              <Text style={styles.detail}>
+                Land Revenue Survey No:{" "}
+                {userProfile.landRevenueSurveyNo || "Not provided"}
+              </Text>
+              <Text style={styles.detail}>
+                GPS Location:{" "}
+                {location?.latitude && location?.longitude
+                  ? `${location.latitude}, ${location.longitude}`
+                  : "Not provided"}
+              </Text>
+              <Button
+                mode="outlined"
+                onPress={handleEditToggle}
+                style={styles.button}
+              >
                 Edit
               </Button>
             </>
@@ -201,8 +219,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   image: {
-    width: '100%',
-    resizeMode: 'cover',
+    width: "100%",
+    resizeMode: "cover",
   },
   card: {
     margin: 16,
@@ -211,7 +229,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
   },
   detail: {
@@ -228,11 +246,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   halfWidth: {
-    width: '48%',
+    width: "48%",
   },
 });
 
