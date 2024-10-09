@@ -1,31 +1,160 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Title, Paragraph, Card, Surface, Button } from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
+import { Title, Paragraph, Card, Surface, Button, ActivityIndicator } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
+import HTML from 'react-native-render-html';
+import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import { PermissionsAndroid } from 'react-native';
+// import Share from 'react-native-share'; // Removed this line
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 
 type RootStackParamList = {
   Home: undefined;
-  OutputScreen: { prediction: { disease: string; pestAttacks: Record<string, string> } };
+  output: { prediction: PredictionType };
 };
 
-type OutputScreenNavigationProp = StackNavigationProp<RootStackParamList, 'OutputScreen'>;
-type OutputScreenRouteProp = RouteProp<RootStackParamList, 'OutputScreen'>;
+type OutputScreenNavigationProp = StackNavigationProp<RootStackParamList, 'output'>;
+type OutputScreenRouteProp = RouteProp<RootStackParamList, 'output'>;
 
 type Props = {
   navigation: OutputScreenNavigationProp;
   route: OutputScreenRouteProp;
 };
 
-const OutputScreen = ({ route, navigation }:any) => {
-  const { prediction } = route.params; // Ensure prediction is received
+type PredictionType = {
+  disease: string;
+  pestAttacks: Record<string, string>;
+};
 
-  // Use the received prediction data instead of dummy data
-  const predictions = prediction; // Use the prediction passed from explore.tsx
+const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { prediction } = route.params;
+  const [llmAnalysis, setLlmAnalysis] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchLlmAnalysis();
+  }, []);
+
+  const fetchLlmAnalysis = async () => {
+    try {
+      const formattedData = {
+        disease: prediction.disease,
+        flea_beetle: prediction.pestAttacks['Flea Beetle'].replace('%', ''),
+        thrips: prediction.pestAttacks['Thrips'].replace('%', ''),
+        mealybug: prediction.pestAttacks['MealyBug'].replace('%', ''),
+        jassids: prediction.pestAttacks['Jassids'].replace('%', ''),
+        red_spider_mites: prediction.pestAttacks['Red Spider Mites'].replace('%', ''),
+        leaf_eating_caterpillar: prediction.pestAttacks['Leaf Eating Caterpillar'].replace('%', ''),
+      };
+
+      const response = await fetch('http://10.0.2.2:8000/describe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formattedData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
+      }
+
+      const data = await response.text();
+      setLlmAnalysis(data);
+    } catch (error) {
+      console.error('Error fetching LLM analysis:', error);
+      setLlmAnalysis(`<p>Failed to load LLM analysis. Error: ${(error as Error).message}</p>`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBackToHome = () => {
-    navigation.navigate('Home'); // Navigates to the Home screen
+    navigation.navigate('Home');
+  };
+
+  const generateScreenContentHTML = () => {
+    return `
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; }
+            .title { font-size: 24px; color: #8E44AD; text-align: center; }
+            .card { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+            .card-title { font-size: 18px; margin-bottom: 10px; }
+            .bar-container { display: flex; align-items: center; margin-bottom: 10px; }
+            .bar-label { width: 30%; }
+            .bar-wrapper { flex: 1; }
+            .bar { height: 20px; background-color: #8E44AD; border-radius: 10px; }
+            .probability-text { margin-left: 10px; }
+          </style>
+        </head>
+        <body>
+          <h1 class="title">Prediction Results</h1>
+          
+          <div class="card">
+            <h2 class="card-title">Predicted Disease</h2>
+            <p>${prediction.disease}</p>
+          </div>
+          
+          <div class="card">
+            <h2 class="card-title">Pest Attack Probabilities</h2>
+            ${Object.entries(prediction.pestAttacks).map(([pest, probability]) => `
+              <div class="bar-container">
+                <div class="bar-label">${pest}</div>
+                <div class="bar-wrapper">
+                  <div class="bar" style="width: ${parseFloat(probability)}%;"></div>
+                </div>
+                <span class="probability-text">${probability}</span>
+              </div>
+            `).join('')}
+          </div>
+          
+          <div class="card">
+            <h2 class="card-title">Detailed Analysis</h2>
+            ${llmAnalysis}
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const downloadScreenContentAsPDF = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+        );
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert('Permission Denied', 'You need to give storage permission to generate the PDF');
+          return;
+        }
+      }
+
+      const htmlContent = generateScreenContentHTML();
+
+      const options = {
+        html: htmlContent,
+        fileName: 'OutputScreenContent',
+        directory: 'Documents',
+      };
+
+      const file = await RNHTMLtoPDF.convert(options);
+      console.log(file.filePath);
+
+      // Removed the Share functionality
+      // await Share.open({
+      //   url: `file://${file.filePath}`,
+      //   type: 'application/pdf',
+      //   title: 'Output Screen Content',
+      // });
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      Alert.alert('Error', 'Failed to generate PDF');
+    }
   };
 
   return (
@@ -38,7 +167,7 @@ const OutputScreen = ({ route, navigation }:any) => {
             <Card style={styles.card}>
               <Card.Content>
                 <Title>Predicted Disease</Title>
-                <Paragraph>{predictions.disease}</Paragraph>
+                <Paragraph>{prediction.disease}</Paragraph>
               </Card.Content>
             </Card>
           </Animatable.View>
@@ -47,17 +176,37 @@ const OutputScreen = ({ route, navigation }:any) => {
             <Card style={styles.card}>
               <Card.Content>
                 <Title>Pest Attack Probabilities</Title>
-                {Object.entries(predictions.pestAttacks).map(([pest, probability], index) => (
-                  <Animatable.View key={pest} animation="fadeInLeft" delay={index * 100}>
-                    <Paragraph>{pest}: {(parseFloat(probability as string) * 100).toFixed(2)}%</Paragraph> {/* Convert to percentage */}
-                  </Animatable.View>
-                ))}
+                <View style={styles.chartContainer}>
+                  {Object.entries(prediction.pestAttacks).map(([pest, probability], index) => (
+                    <Animatable.View key={pest} animation="fadeInLeft" delay={index * 100} style={styles.barContainer}>
+                      <View style={styles.labelContainer}>
+                        <Paragraph>{pest}</Paragraph>
+                      </View>
+                      <View style={styles.barWrapper}>
+                        <View style={[styles.bar, { width: `${parseFloat(probability)}%` }]} />
+                        <Paragraph style={styles.probabilityText}>{probability}</Paragraph>
+                      </View>
+                    </Animatable.View>
+                  ))}
+                </View>
               </Card.Content>
             </Card>
           </Animatable.View>
 
-          {/* Add Back to Home button */}
           <Animatable.View animation="fadeIn" delay={900}>
+            <Card style={styles.card}>
+              <Card.Content>
+                <Title>Detailed Analysis</Title>
+                {loading ? (
+                  <ActivityIndicator animating={true} color="#8E44AD" />
+                ) : (
+                  <HTML source={{ html: llmAnalysis }} contentWidth={300} />
+                )}
+              </Card.Content>
+            </Card>
+          </Animatable.View>
+
+          <Animatable.View animation="fadeIn" delay={1200}>
             <Button
               mode="contained"
               onPress={handleBackToHome}
@@ -65,6 +214,17 @@ const OutputScreen = ({ route, navigation }:any) => {
               labelStyle={styles.buttonLabel}
             >
               Back to Home
+            </Button>
+          </Animatable.View>
+
+          <Animatable.View animation="fadeIn" delay={1500}>
+            <Button
+              mode="contained"
+              onPress={downloadScreenContentAsPDF}
+              style={[styles.button, styles.pdfButton]}
+              labelStyle={styles.buttonLabel}
+            >
+              Download Screen as PDF
             </Button>
           </Animatable.View>
         </Surface>
@@ -92,6 +252,30 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 20,
   },
+  chartContainer: {
+    marginTop: 10,
+  },
+  barContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  labelContainer: {
+    width: '30%',
+  },
+  barWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bar: {
+    height: 20,
+    backgroundColor: '#8E44AD',
+    borderRadius: 10,
+  },
+  probabilityText: {
+    marginLeft: 10,
+  },
   button: {
     marginTop: 20,
     backgroundColor: '#8E44AD',
@@ -99,6 +283,10 @@ const styles = StyleSheet.create({
   },
   buttonLabel: {
     color: '#FFF',
+  },
+  pdfButton: {
+    marginTop: 10,
+    backgroundColor: '#27AE60',
   },
 });
 
