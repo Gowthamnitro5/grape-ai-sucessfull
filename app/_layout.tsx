@@ -5,21 +5,27 @@ import TabLayout from "./(tabs)/_layout";
 import Auth from "./auth";
 import SplashScreen from "./SplashScreen";
 import OutputScreen from "./output";
+import { Pest } from "@/components/services/describe";
+
+export type RootStackParamList = {
+  "(tabs)": undefined;
+  auth: undefined;
+  SplashScreen: undefined;
+  output: { input: Pest };
+};
 
 export default function RootLayout() {
-  const Stack = createNativeStackNavigator();
+  const Stack = createNativeStackNavigator<RootStackParamList>();
 
   return (
     <Stack.Navigator initialRouteName="SplashScreen">
       <Stack.Screen
         name="(tabs)"
         component={TabLayout}
-        options={{ 
-            headerShown: false,
-            // Remove tabBarOptions from here if this is a stack navigator
+        options={{
+          headerShown: false,
         }}
       />
-      
       <Stack.Screen
         name="auth"
         component={Auth}
@@ -35,7 +41,6 @@ export default function RootLayout() {
         component={OutputScreen}
         options={{ headerShown: false }}
       />
-      
     </Stack.Navigator>
   );
 }
