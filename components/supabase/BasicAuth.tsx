@@ -18,6 +18,7 @@ export default function Auth() {
     if (error) {
       console.log(error.message);
       Alert.alert(error.message);
+      return;
     }
     setLoading(false);
     console.log("Sign In Successful!");

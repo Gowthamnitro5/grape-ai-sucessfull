@@ -9,59 +9,20 @@ import {
 } from "react-native";
 import { Text, Card, TextInput, Button, useTheme } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
-import { useLocation } from "@/components/services/DataService";
+import * as Location from "expo-location";
+import { useDataService } from "@/components/services/DataService";
+import { supabase } from "@/utils/supabase";
 
-interface UserProfile {
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  soilType: string;
-  farmArea: string;
-  landRevenueSurveyNo: string;
-  gpsLocation: {
-    latitude: string;
-    longitude: string;
-  };
-  referralCode: string;
-  predictionsCount: number;
-}
-
-const initialUserProfile: UserProfile = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  phone: "123-456-7890",
-  address: "123 Main St, Anytown, USA",
-  soilType: "",
-  farmArea: "",
-  landRevenueSurveyNo: "",
-  gpsLocation: {
-    latitude: "",
-    longitude: "",
-  },
-  referralCode: "", // Initialize referral code
-  predictionsCount: 0, // Initialize predictions count
-};
-
-const Profile = () => {
-  const [userProfile, setUserProfile] =
-    useState<UserProfile>(initialUserProfile);
+const Profile = ({ navigation }: any) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { width } = useWindowDimensions();
   const theme = useTheme();
 
-  const { location } = useLocation(); // Get location from context
+  const { userProfile, location } = useDataService();
 
-  const handleInputChange = (key: keyof UserProfile, value: string) => {
-    setUserProfile({ ...userProfile, [key]: value });
-  };
+  const handleInputChange = () => {};
 
-  const handleGpsChange = (key: "latitude" | "longitude", value: string) => {
-    setUserProfile({
-      ...userProfile,
-      gpsLocation: { ...userProfile.gpsLocation, [key]: value },
-    });
-  };
+  const handleGpsChange = (key: "latitude" | "longitude", value: string) => {};
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
@@ -72,14 +33,27 @@ const Profile = () => {
     setIsEditing(false);
   };
 
-  const handleLogout = () => {
-    Alert.alert("Logout", "You have been logged out successfully.");
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error(`Error : ${error}`);
+        Alert.alert("Error", `${error.message}`);
+      } else {
+        // Successfully signed out
+        Alert.alert("Logout", "You have been logged out successfully.");
+        navigation.navigate("auth");
+      }
+    } catch (error) {
+      Alert.alert("Error", `An unexpected error ${error}`);
+      console.error("Logout Error: ", error);
+    }
   };
 
   const handleReferralSubmit = () => {
     Alert.alert(
       "Referral Code",
-      `Referral code ${userProfile.referralCode} submitted.`
+      `Referral code ${userProfile?.referralCode} submitted.`
     );
   };
 
@@ -93,25 +67,25 @@ const Profile = () => {
       />
       <Card style={styles.card}>
         <Card.Content>
-          <Text style={styles.title}>{userProfile.name}</Text>
-          <Text style={styles.detail}>Email: {userProfile.email}</Text>
-          {userProfile.phone && (
-            <Text style={styles.detail}>Phone: {userProfile.phone}</Text>
+          <Text style={styles.title}>{userProfile?.name}</Text>
+          <Text style={styles.detail}>Email: {userProfile?.email}</Text>
+          {userProfile?.phone && (
+            <Text style={styles.detail}>Phone: {userProfile?.phone}</Text>
           )}
-          {userProfile.address && (
-            <Text style={styles.detail}>Address: {userProfile.address}</Text>
+          {userProfile?.address && (
+            <Text style={styles.detail}>Address: {userProfile?.address}</Text>
           )}
           <Text style={styles.detail}>
-            Predictions Count: {userProfile.predictionsCount}
+            Predictions Count: {userProfile?.predictionsCount}
           </Text>
 
           {isEditing ? (
             <>
               <Picker
-                selectedValue={userProfile.soilType}
-                onValueChange={(itemValue) =>
-                  handleInputChange("soilType", itemValue)
-                }
+                selectedValue={userProfile?.soilType}
+                // onValueChange={(itemValue) =>
+                //   handleInputChange("soilType", itemValue)
+                // }
                 style={styles.picker}
               >
                 <Picker.Item label="Select Soil Type" value="" />
@@ -127,30 +101,30 @@ const Profile = () => {
               </Picker>
               <TextInput
                 label="Area of Farm (in acres)"
-                value={userProfile.farmArea}
-                onChangeText={(text) => handleInputChange("farmArea", text)}
+                value={userProfile?.farmArea}
+                // onChangeText={(text) => handleInputChange("farmArea", text)}
                 style={styles.input}
                 keyboardType="numeric"
               />
               <TextInput
                 label="Land Revenue Survey No"
-                value={userProfile.landRevenueSurveyNo}
-                onChangeText={(text) =>
-                  handleInputChange("landRevenueSurveyNo", text)
-                }
+                value={userProfile?.landRevenueSurveyNo}
+                // onChangeText={(text) =>
+                //   handleInputChange("landRevenueSurveyNo", text)
+                // }
                 style={styles.input}
               />
               <View style={styles.row}>
                 <TextInput
                   label="GPS Latitude"
-                  value={userProfile.gpsLocation.latitude}
+                  value={location?.latitude}
                   onChangeText={(text) => handleGpsChange("latitude", text)}
                   style={[styles.input, styles.halfWidth]}
                   keyboardType="numeric"
                 />
                 <TextInput
                   label="GPS Longitude"
-                  value={userProfile.gpsLocation.longitude}
+                  value={location?.longitude}
                   onChangeText={(text) => handleGpsChange("longitude", text)}
                   style={[styles.input, styles.halfWidth]}
                   keyboardType="numeric"
@@ -158,8 +132,8 @@ const Profile = () => {
               </View>
               <TextInput
                 label="Referral Code"
-                value={userProfile.referralCode}
-                onChangeText={(text) => handleInputChange("referralCode", text)}
+                value={userProfile?.referralCode}
+                // onChangeText={(text) => handleInputChange("referralCode", text)}
                 style={styles.input}
               />
               <Button
@@ -180,14 +154,14 @@ const Profile = () => {
           ) : (
             <>
               <Text style={styles.detail}>
-                Soil Type: {userProfile.soilType || "Not provided"}
+                Soil Type: {userProfile?.soilType || "Not provided"}
               </Text>
               <Text style={styles.detail}>
-                Farm Area: {userProfile.farmArea || "Not provided"} acres
+                Farm Area: {userProfile?.farmArea || "Not provided"} acres
               </Text>
               <Text style={styles.detail}>
                 Land Revenue Survey No:{" "}
-                {userProfile.landRevenueSurveyNo || "Not provided"}
+                {userProfile?.landRevenueSurveyNo || "Not provided"}
               </Text>
               <Text style={styles.detail}>
                 GPS Location:{" "}
