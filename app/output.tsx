@@ -1,35 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
-import { Title, Paragraph, Card, Surface, Button, ActivityIndicator } from 'react-native-paper';
-import * as Animatable from 'react-native-animatable';
-import HTML from 'react-native-render-html';
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import { PermissionsAndroid } from 'react-native';
-// import Share from 'react-native-share'; // Removed this line
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, ScrollView, Platform, Alert } from "react-native";
+import {
+  Title,
+  Paragraph,
+  Card,
+  Surface,
+  Button,
+  ActivityIndicator,
+} from "react-native-paper";
+import * as Animatable from "react-native-animatable";
+import HTML from "react-native-render-html";
+import RNHTMLtoPDF from "react-native-html-to-pdf";
+import { PermissionsAndroid } from "react-native";
+import { describePest, Pest } from "@/components/services/describe";
+import { RootStackParamList } from "./_layout";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-type RootStackParamList = {
-  Home: undefined;
-  output: { prediction: PredictionType };
-};
+type Props = NativeStackScreenProps<RootStackParamList, "output">;
 
-type OutputScreenNavigationProp = StackNavigationProp<RootStackParamList, 'output'>;
-type OutputScreenRouteProp = RouteProp<RootStackParamList, 'output'>;
-
-type Props = {
-  navigation: OutputScreenNavigationProp;
-  route: OutputScreenRouteProp;
-};
-
-type PredictionType = {
-  disease: string;
-  pestAttacks: Record<string, string>;
-};
-
-const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
-  const { prediction } = route.params;
-  const [llmAnalysis, setLlmAnalysis] = useState('');
+const OutputScreen = ({ route, navigation }: Props) => {
+  const prediction: Pest = route.params.input;
+  const [llmAnalysis, setLlmAnalysis] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,41 +29,17 @@ const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const fetchLlmAnalysis = async () => {
     try {
-      const formattedData = {
-        disease: prediction.disease,
-        flea_beetle: prediction.pestAttacks['Flea Beetle'].replace('%', ''),
-        thrips: prediction.pestAttacks['Thrips'].replace('%', ''),
-        mealybug: prediction.pestAttacks['MealyBug'].replace('%', ''),
-        jassids: prediction.pestAttacks['Jassids'].replace('%', ''),
-        red_spider_mites: prediction.pestAttacks['Red Spider Mites'].replace('%', ''),
-        leaf_eating_caterpillar: prediction.pestAttacks['Leaf Eating Caterpillar'].replace('%', ''),
-      };
-
-      const response = await fetch('http://10.0.2.2:8000/describe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formattedData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
-      }
-
-      const data = await response.text();
-      setLlmAnalysis(data);
+      const response = await describePest(prediction);
+      console.log(response);
+      setLlmAnalysis(response);
     } catch (error) {
-      console.error('Error fetching LLM analysis:', error);
-      setLlmAnalysis(`<p>Failed to load LLM analysis. Error: ${(error as Error).message}</p>`);
+      console.error("Error fetching LLM analysis:", error);
+      setLlmAnalysis(
+        `<p>Failed to load LLM analysis. Error: ${(error as Error).message}</p>`
+      );
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleBackToHome = () => {
-    navigation.navigate('Home');
   };
 
   const generateScreenContentHTML = () => {
@@ -93,25 +60,36 @@ const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
         </head>
         <body>
           <h1 class="title">Prediction Results</h1>
-          
+  
           <div class="card">
             <h2 class="card-title">Predicted Disease</h2>
             <p>${prediction.disease}</p>
           </div>
-          
+  
           <div class="card">
             <h2 class="card-title">Pest Attack Probabilities</h2>
-            ${Object.entries(prediction.pestAttacks).map(([pest, probability]) => `
+            ${Object.entries({
+              flea_beetle: prediction.flea_beetle,
+              thrips: prediction.thrips,
+              mealybug: prediction.mealybug,
+              jassids: prediction.jassids,
+              red_spider_mites: prediction.red_spider_mites,
+              leaf_eating_caterpillar: prediction.leaf_eating_caterpillar,
+            })
+              .map(
+                ([pest, probability]) => `
               <div class="bar-container">
-                <div class="bar-label">${pest}</div>
+                <div class="bar-label">${pest.replace(/_/g, " ")}</div>
                 <div class="bar-wrapper">
-                  <div class="bar" style="width: ${parseFloat(probability)}%;"></div>
+                  <div class="bar" style="width: ${probability}%;"></div>
                 </div>
                 <span class="probability-text">${probability}</span>
               </div>
-            `).join('')}
+            `
+              )
+              .join("")}
           </div>
-          
+  
           <div class="card">
             <h2 class="card-title">Detailed Analysis</h2>
             ${llmAnalysis}
@@ -121,24 +99,27 @@ const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
     `;
   };
 
+  const htmlContent = generateScreenContentHTML();
+
   const downloadScreenContentAsPDF = async () => {
     try {
-      if (Platform.OS === 'android') {
+      if (Platform.OS === "android") {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
         );
         if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          Alert.alert('Permission Denied', 'You need to give storage permission to generate the PDF');
+          Alert.alert(
+            "Permission Denied",
+            "You need to give storage permission to generate the PDF"
+          );
           return;
         }
       }
 
-      const htmlContent = generateScreenContentHTML();
-
       const options = {
         html: htmlContent,
-        fileName: 'OutputScreenContent',
-        directory: 'Documents',
+        fileName: "OutputScreenContent",
+        directory: "Documents",
       };
 
       const file = await RNHTMLtoPDF.convert(options);
@@ -150,10 +131,9 @@ const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
       //   type: 'application/pdf',
       //   title: 'Output Screen Content',
       // });
-
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      Alert.alert('Error', 'Failed to generate PDF');
+      console.error("Error generating PDF:", error);
+      Alert.alert("Error", "Failed to generate PDF");
     }
   };
 
@@ -177,14 +157,30 @@ const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
               <Card.Content>
                 <Title>Pest Attack Probabilities</Title>
                 <View style={styles.chartContainer}>
-                  {Object.entries(prediction.pestAttacks).map(([pest, probability], index) => (
-                    <Animatable.View key={pest} animation="fadeInLeft" delay={index * 100} style={styles.barContainer}>
+                  {Object.entries({
+                    flea_beetle: prediction.flea_beetle,
+                    thrips: prediction.thrips,
+                    mealybug: prediction.mealybug,
+                    jassids: prediction.jassids,
+                    red_spider_mites: prediction.red_spider_mites,
+                    leaf_eating_caterpillar: prediction.leaf_eating_caterpillar,
+                  }).map(([pest, probability], index) => (
+                    <Animatable.View
+                      key={pest}
+                      animation="fadeInLeft"
+                      delay={index * 100}
+                      style={styles.barContainer}
+                    >
                       <View style={styles.labelContainer}>
-                        <Paragraph>{pest}</Paragraph>
+                        <Paragraph>{pest.replace(/_/g, " ")}</Paragraph>
                       </View>
                       <View style={styles.barWrapper}>
-                        <View style={[styles.bar, { width: `${parseFloat(probability)}%` }]} />
-                        <Paragraph style={styles.probabilityText}>{probability}</Paragraph>
+                        <View
+                          style={[styles.bar, { width: `${probability}%` }]}
+                        />
+                        <Paragraph style={styles.probabilityText}>
+                          {probability}
+                        </Paragraph>
                       </View>
                     </Animatable.View>
                   ))}
@@ -209,7 +205,7 @@ const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
           <Animatable.View animation="fadeIn" delay={1200}>
             <Button
               mode="contained"
-              onPress={handleBackToHome}
+              onPress={() => navigation.navigate("(tabs)")}
               style={styles.button}
               labelStyle={styles.buttonLabel}
             >
@@ -218,6 +214,7 @@ const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
           </Animatable.View>
 
           <Animatable.View animation="fadeIn" delay={1500}>
+            //{" "}
             <Button
               mode="contained"
               onPress={downloadScreenContentAsPDF}
@@ -236,7 +233,7 @@ const OutputScreen: React.FC<Props> = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#F4F6F7',
+    backgroundColor: "#F4F6F7",
   },
   surface: {
     padding: 20,
@@ -246,8 +243,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     marginBottom: 20,
-    textAlign: 'center',
-    color: '#8E44AD',
+    textAlign: "center",
+    color: "#8E44AD",
   },
   card: {
     marginBottom: 20,
@@ -256,21 +253,21 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   barContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
   },
   labelContainer: {
-    width: '30%',
+    width: "30%",
   },
   barWrapper: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   bar: {
     height: 20,
-    backgroundColor: '#8E44AD',
+    backgroundColor: "#8E44AD",
     borderRadius: 10,
   },
   probabilityText: {
@@ -278,15 +275,15 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    backgroundColor: '#8E44AD',
+    backgroundColor: "#8E44AD",
     borderRadius: 10,
   },
   buttonLabel: {
-    color: '#FFF',
+    color: "#FFF",
   },
   pdfButton: {
     marginTop: 10,
-    backgroundColor: '#27AE60',
+    backgroundColor: "#27AE60",
   },
 });
 

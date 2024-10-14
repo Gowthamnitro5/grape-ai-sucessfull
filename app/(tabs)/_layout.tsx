@@ -8,12 +8,12 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { LocationProvider } from "@/components/services/DataService";
+import { DataProvider } from "@/components/services/DataService";
 const Tab = createBottomTabNavigator();
 
 export default function TabLayout() {
   return (
-    <LocationProvider>
+    <DataProvider>
       <Tab.Navigator initialRouteName="home">
         <Tab.Screen
           name="Home"
@@ -57,6 +57,6 @@ export default function TabLayout() {
           }}
         />
       </Tab.Navigator>
-    </LocationProvider>
+    </DataProvider>
   );
 }
