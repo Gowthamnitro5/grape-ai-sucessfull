@@ -1,7 +1,6 @@
-// import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import { AppState } from "react-native";
-// import "react-native-url-polyfill/auto";
 
 const supabaseUrl = "https://ajqrjbwizdylkmdecnvw.supabase.co";
 const supabaseAnonKey =
@@ -28,3 +27,15 @@ AppState.addEventListener("change", (state) => {
     supabase.auth.stopAutoRefresh();
   }
 });
+
+export type profile = {
+  email: string;
+  password: string;
+  fullName: string;
+  phone: string;
+  address: string;
+  soilType: string;
+  farmArea: string;
+  referralCode: string;
+  landRevenueSurveyNo: string;
+};
