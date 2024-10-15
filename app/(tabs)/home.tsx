@@ -217,25 +217,7 @@ const HomeScreen: React.FC = ({ navigation }: any) => {
           </Card>
         </View>
 
-        <Title style={styles.sectionTitle}>Latest Insights</Title>
-        <View style={dynamicStyles.cardContainer}>
-          {[1, 2, 3].map((blog) => (
-            <Card key={blog} style={[dynamicStyles.blogCard, styles.insightCard]}>
-              <Card.Cover source={{ uri: `https://picsum.photos/seed/grape${blog}/300/200` }} />
-              <Card.Content>
-                <Title style={styles.insightTitle}>Grape Insight {blog}</Title>
-                <Paragraph numberOfLines={2} style={styles.insightPreview}>
-                  Discover the latest trends and techniques in grape cultivation. Click to learn more...
-                </Paragraph>
-              </Card.Content>
-              <Card.Actions>
-                <Button icon="arrow-right" mode="text" onPress={() => {}}>
-                  Read More
-                </Button>
-              </Card.Actions>
-            </Card>
-          ))}
-        </View>
+
       </LinearGradient>
     </ScrollView>
   );

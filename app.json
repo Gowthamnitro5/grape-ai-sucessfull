@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "my-app",
-    "slug": "my-app",
+    "slug": "grapeai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/grapeai.png",
@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/grapeai.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.gowtham23s.grapeai"
     },
     "web": {
       "bundler": "metro",
@@ -31,6 +32,12 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7431c495-f4c5-4989-9ab8-62b036831188"
+      }
+    },
+    "owner": "gowtham23s"
   }
 }
