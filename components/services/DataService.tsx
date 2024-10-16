@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import * as Location from "expo-location";
+import { Session } from "@supabase/supabase-js";
+import { supabase } from "@/utils/supabase";
 
 // Define the shape of the Data.
 interface Location {
@@ -8,6 +10,7 @@ interface Location {
 }
 
 interface Profile {
+  id: string;
   name?: string;
   email: string;
   phone?: string;
@@ -19,14 +22,6 @@ interface Profile {
   predictionsCount?: number;
 }
 
-const init: Profile = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  phone: "123-456-7890",
-  address: "123 Main St, Anytown, USA",
-  predictionsCount: 0,
-};
-
 // Define the shape of the context
 interface contextType {
   location: Location | null;
@@ -35,6 +30,7 @@ interface contextType {
   setLocation: React.Dispatch<React.SetStateAction<Location | null>>;
   fetchProfile: () => Promise<void>;
   fetchLocation: () => Promise<void>;
+  session: Session | null;
 }
 
 // Create the context
@@ -44,7 +40,7 @@ const dataContext = createContext<contextType | undefined>(undefined);
 export const useDataService = () => {
   const context = useContext(dataContext);
   if (!context) {
-    throw new Error("useApp must be used within a LocationProvider");
+    throw new Error("useDataService must be used within a DataProvider");
   }
   return context;
 };
@@ -53,8 +49,9 @@ export const useDataService = () => {
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [userProfile, setUserProfile] = useState<Profile | null>(init);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   // Function to fetch location data
   const fetchLocation = async () => {
@@ -71,14 +68,76 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // Function to fetch user profile data (from Supabase or another API)
+  // Fetch user profile from database.
   const fetchProfile = async () => {
-    return;
+    if (session?.user.id) {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        if (data) {
+          const user: Profile = {
+            id: data?.id || "",
+            name: data?.full_name || "",
+            email: session.user.email || "",
+            phone: data?.phone?.toString(),
+            address: data?.address || "",
+            soilType: data?.soil_type || "",
+            farmArea: data?.farm_area?.toString() || "",
+            referralCode: data?.referral_code || "",
+            landRevenueSurveyNo: data?.land_revenue_survey_no?.toString() || "",
+            predictionsCount: data?.predictions_count || 0,
+          };
+          console.log(user);
+          setUserProfile(user);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
 
-  // Fetch user profile and location on component mount
+  // Handle session changes
   useEffect(() => {
-    fetchProfile();
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setSession(session);
+    };
+
+    // Check session on initial render
+    checkSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    // Cleanup listener when the component unmounts
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  // fetch profile when there is a session changes.
+  useEffect(() => {
+    if (session && session.user) {
+      fetchProfile();
+    }
+  }, [session]);
+
+  // Fetch location on component mount
+  useEffect(() => {
     fetchLocation();
   }, []);
 
@@ -91,6 +150,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         setLocation,
         fetchProfile,
         fetchLocation,
+        session,
       }}
     >
       {children}
