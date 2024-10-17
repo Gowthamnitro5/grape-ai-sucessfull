@@ -19,6 +19,8 @@ import { predictionResult } from "@/components/services/prediction";
 import Toast from "react-native-toast-message";
 import { Prediction } from "@/components/services/prediction";
 import { Pest } from "@/components/services/describe";
+import { supabase } from "@/utils/supabase";
+import { useDataService } from "@/components/services/DataService";
 
 const Explore = ({ navigation }: any) => {
   const { width } = useWindowDimensions();
@@ -36,6 +38,7 @@ const Explore = ({ navigation }: any) => {
   });
 
   const [loading, setLoading] = useState<boolean>(false);
+  const { session, fetchProfile } = useDataService();
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -43,6 +46,18 @@ const Explore = ({ navigation }: any) => {
       const prediction: Pest = await predictionResult(inputs);
       if (prediction) {
         console.log(prediction);
+        if (session?.user.id && prediction.disease) {
+          const { error } = await supabase.from("predictions").insert({
+            user_id: session.user.id,
+            disease: prediction.disease,
+          });
+          if (error) {
+            console.error(error.message);
+            Alert.alert("Database error", "Please try again later ...");
+            return;
+          }
+        }
+        await fetchProfile();
         navigation.navigate("output", { input: prediction });
       } else {
         Toast.show({
