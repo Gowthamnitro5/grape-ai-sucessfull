@@ -38,7 +38,7 @@ const Explore = ({ navigation }: any) => {
   });
 
   const [loading, setLoading] = useState<boolean>(false);
-  const { session, fetchProfile } = useDataService();
+  const { session, fetchProfile, fetchHistory } = useDataService();
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -58,6 +58,7 @@ const Explore = ({ navigation }: any) => {
           }
         }
         await fetchProfile();
+        await fetchHistory();
         navigation.navigate("output", { input: prediction });
       } else {
         Toast.show({

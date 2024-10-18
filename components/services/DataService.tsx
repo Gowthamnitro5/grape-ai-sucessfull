@@ -22,14 +22,24 @@ interface Profile {
   predictionsCount?: number;
 }
 
+interface History {
+  id: string;
+  date: string;
+  time: string;
+  disease: string;
+}
+
 // Define the shape of the context
 interface contextType {
   location: Location | null;
   userProfile: Profile | null;
+  userHistory: History[] | null;
   setUserProfile: React.Dispatch<React.SetStateAction<Profile | null>>;
   setLocation: React.Dispatch<React.SetStateAction<Location | null>>;
+  setUserHistory: React.Dispatch<React.SetStateAction<History[] | null>>;
   fetchProfile: () => Promise<void>;
   fetchLocation: () => Promise<void>;
+  fetchHistory: () => Promise<void>;
   session: Session | null;
 }
 
@@ -52,6 +62,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [location, setLocation] = useState<Location | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [userHistory, setUserHistory] = useState<History[] | null>([]);
 
   // Function to fetch location data
   const fetchLocation = async () => {
@@ -96,13 +107,34 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
             landRevenueSurveyNo: data?.land_revenue_survey_no?.toString() || "",
             predictionsCount: data?.predictions_count || 0,
           };
-          console.log(user);
           setUserProfile(user);
         }
       } catch (error) {
         console.error(error);
       }
     }
+  };
+
+  // Fetch User's predictions from database.
+  const fetchHistory = async () => {
+    const user_id = session?.user.id;
+    const { data, error } = await supabase
+      .from("predictions")
+      .select(
+        `
+        id,
+        date,
+        time,
+        disease
+        `
+      )
+      .eq("user_id", user_id);
+    if (error) {
+      console.error(error.message);
+      return;
+    }
+    const items = data as History[];
+    setUserHistory(items);
   };
 
   // Handle session changes
@@ -129,10 +161,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
-  // fetch profile when there is a session changes.
+  // fetch profile and history when there is a session changes.
   useEffect(() => {
     if (session && session.user) {
       fetchProfile();
+      fetchHistory();
     }
   }, [session]);
 
@@ -146,10 +179,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         userProfile,
         location,
+        userHistory,
         setUserProfile,
         setLocation,
+        setUserHistory,
         fetchProfile,
         fetchLocation,
+        fetchHistory,
         session,
       }}
     >
