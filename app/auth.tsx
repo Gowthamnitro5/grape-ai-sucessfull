@@ -38,9 +38,5 @@ export default function Auth({ navigation }: any) {
     }
   }, [session]);
 
-  return (
-    <View>
-      <BasicAuth />
-    </View>
-  );
+  return <BasicAuth />;
 }

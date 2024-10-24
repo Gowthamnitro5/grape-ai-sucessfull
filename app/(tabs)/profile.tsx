@@ -9,27 +9,59 @@ import {
 } from "react-native";
 import { Text, Card, TextInput, Button, useTheme } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
-import * as Location from "expo-location";
 import { useDataService } from "@/components/services/DataService";
 import { supabase } from "@/utils/supabase";
 
 const Profile = ({ navigation }: any) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [localProfile, setLocalProfile] = useState<any>(null);
   const { width } = useWindowDimensions();
-  const theme = useTheme();
+  const { userProfile, location, session, fetchProfile } = useDataService();
 
-  const { userProfile, location } = useDataService();
+  useEffect(() => {
+    if (userProfile) {
+      setLocalProfile(userProfile);
+    }
+  }, [userProfile]);
 
-  const handleInputChange = () => {};
-
-  const handleGpsChange = (key: "latitude" | "longitude", value: string) => {};
-
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
+  const handleInputChange = (key: string, value: string) => {
+    setLocalProfile((prevProfile: any) => ({
+      ...prevProfile,
+      [key]: value,
+    }));
   };
 
-  const handleSave = () => {
-    console.log("Updated Profile:", userProfile);
+  const handleEditToggle = () => {
+    setIsEditing((prev) => !prev);
+    if (!isEditing) {
+      setLocalProfile(userProfile); // Set local state when entering edit mode
+    }
+  };
+
+  const handleSave = async () => {
+    if (!session?.user.id && !localProfile) return;
+    try {
+      console.log("Profile before accessing database", localProfile);
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          soil_type: localProfile.soilType,
+          farm_area: localProfile.farmArea,
+          // referral_code: localProfile.referralCode,
+          land_revenue_survey_no: localProfile.landRevenueSurveyNo,
+        })
+        .eq("id", session?.user.id);
+
+      if (error) {
+        console.error(error);
+        throw Error(error.message);
+      }
+    } catch (error) {
+      Alert.alert("Database error.");
+      return;
+    }
+    await fetchProfile();
+    Alert.alert("Profile updated successfully");
     setIsEditing(false);
   };
 
@@ -40,20 +72,38 @@ const Profile = ({ navigation }: any) => {
         console.error(`Error : ${error}`);
         Alert.alert("Error", `${error.message}`);
       } else {
-        // Successfully signed out
         Alert.alert("Logout", "You have been logged out successfully.");
         navigation.navigate("auth");
       }
     } catch (error) {
-      Alert.alert("Error", `An unexpected error ${error}`);
+      Alert.alert("Error", `An unexpected error occurred: ${error}`);
       console.error("Logout Error: ", error);
     }
   };
 
-  const handleReferralSubmit = () => {
+  const handleReferralSubmit = async () => {
+    if (!session?.user.id && !localProfile) return;
+    try {
+      console.log("Profile before accessing database", localProfile);
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          referral_code: localProfile.referralCode,
+        })
+        .eq("id", session?.user.id);
+
+      if (error) {
+        console.error(error);
+        throw Error(error.message);
+      }
+    } catch (error) {
+      Alert.alert("Error in the server ...");
+      return;
+    }
+    await fetchProfile();
     Alert.alert(
       "Referral Code",
-      `Referral code ${userProfile?.referralCode} submitted.`
+      `Referral code ${localProfile?.referralCode} submitted.`
     );
   };
 
@@ -82,10 +132,10 @@ const Profile = ({ navigation }: any) => {
           {isEditing ? (
             <>
               <Picker
-                selectedValue={userProfile?.soilType}
-                // onValueChange={(itemValue) =>
-                //   handleInputChange("soilType", itemValue)
-                // }
+                selectedValue={localProfile?.soilType}
+                onValueChange={(itemValue) =>
+                  handleInputChange("soilType", itemValue)
+                }
                 style={styles.picker}
               >
                 <Picker.Item label="Select Soil Type" value="" />
@@ -101,39 +151,39 @@ const Profile = ({ navigation }: any) => {
               </Picker>
               <TextInput
                 label="Area of Farm (in acres)"
-                value={userProfile?.farmArea}
-                // onChangeText={(text) => handleInputChange("farmArea", text)}
+                value={localProfile?.farmArea?.toString()} // Ensure it's a string
+                onChangeText={(text) => handleInputChange("farmArea", text)}
                 style={styles.input}
                 keyboardType="numeric"
               />
               <TextInput
                 label="Land Revenue Survey No"
-                value={userProfile?.landRevenueSurveyNo}
-                // onChangeText={(text) =>
-                //   handleInputChange("landRevenueSurveyNo", text)
-                // }
+                value={localProfile?.landRevenueSurveyNo}
+                onChangeText={(text) =>
+                  handleInputChange("landRevenueSurveyNo", text)
+                }
                 style={styles.input}
               />
               <View style={styles.row}>
                 <TextInput
                   label="GPS Latitude"
-                  value={location?.latitude}
-                  onChangeText={(text) => handleGpsChange("latitude", text)}
+                  value={localProfile?.latitude?.toString()} // Ensure it's a string
+                  onChangeText={(text) => handleInputChange("latitude", text)}
                   style={[styles.input, styles.halfWidth]}
                   keyboardType="numeric"
                 />
                 <TextInput
                   label="GPS Longitude"
-                  value={location?.longitude}
-                  onChangeText={(text) => handleGpsChange("longitude", text)}
+                  value={localProfile?.longitude?.toString()} // Ensure it's a string
+                  onChangeText={(text) => handleInputChange("longitude", text)}
                   style={[styles.input, styles.halfWidth]}
                   keyboardType="numeric"
                 />
               </View>
               <TextInput
                 label="Referral Code"
-                value={userProfile?.referralCode}
-                // onChangeText={(text) => handleInputChange("referralCode", text)}
+                value={localProfile?.referralCode}
+                onChangeText={(text) => handleInputChange("referralCode", text)}
                 style={styles.input}
               />
               <Button
