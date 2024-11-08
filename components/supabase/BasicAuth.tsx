@@ -1,325 +1,326 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Alert,
   ScrollView,
   StyleSheet,
   View,
+  Platform,
   SafeAreaView,
-} from "react-native";
-import { profile as SignUpData, supabase } from "@/utils/supabase";
-import { Button, Input } from "@rneui/themed";
-import { KeyboardTypeOptions } from "react-native";
-// import { profile as SignUpData } from "@/components/supabase/schemas";
+  KeyboardAvoidingView,
+  Dimensions,
+  Text,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import { profile as SignUpData, supabase } from '@/utils/supabase';
+import { Input } from '@rneui/themed';
+import { KeyboardTypeOptions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
-/**
- * Handle Sign-Up.
- */
+const { width, height } = Dimensions.get('window');
 
-type SignUpProps = {
+interface FormFieldProps {
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  accessibilityLabel: string;
+}
+
+const FormField: React.FC<FormFieldProps> = ({ label, value, onChangeText, accessibilityLabel, ...rest }) => (
+  <View style={styles.fieldContainer}>
+    <Text style={styles.fieldLabel}>{label}</Text>
+    <Input
+      value={value}
+      onChangeText={onChangeText}
+      inputContainerStyle={styles.inputContainer}
+      inputStyle={styles.inputText}
+      accessible={true}
+      accessibilityLabel={accessibilityLabel}
+      {...rest}
+    />
+  </View>
+);
+
+interface SignUpProps {
   signUpData: SignUpData;
-  setSignUpData: React.Dispatch<React.SetStateAction<SignUpData>>;
-  signUpUser: () => Promise<void>;
+  setSignUpData: (data: SignUpData) => void;
+  signUpUser: () => void;
   loading: boolean;
-};
+}
 
-const SignUp: React.FC<SignUpProps> = ({
-  signUpData,
-  setSignUpData,
-  signUpUser,
-  loading,
-}) => {
+const SignUp: React.FC<SignUpProps> = ({ signUpData, setSignUpData, signUpUser, loading }) => {
   const signUpFields = [
-    {
-      label: "Email",
-      key: "email",
-      keyboardType: "email-address" as KeyboardTypeOptions,
-    },
-    { label: "Password", key: "password", secureTextEntry: true },
-    { label: "Full Name", key: "fullName" },
-    {
-      label: "Phone Number",
-      key: "phone",
-      keyboardType: "numeric" as KeyboardTypeOptions,
-    },
-    { label: "Address", key: "address" },
-    { label: "Soil Type", key: "soilType" },
-    {
-      label: "Farm Area (in acres)",
-      key: "farmArea",
-      keyboardType: "numeric" as KeyboardTypeOptions,
-    },
-    { label: "Referral Code", key: "referralCode" },
-    {
-      label: "Land Revenue Survey No",
-      key: "landRevenueSurveyNo",
-      keyboardType: "numeric" as KeyboardTypeOptions,
-    },
+    { label: 'Email', key: 'email', keyboardType: 'email-address', accessibilityLabel: 'Enter your email address' },
+    { label: 'Password', key: 'password', secureTextEntry: true, accessibilityLabel: 'Enter your password' },
+    { label: 'Full Name', key: 'fullName', accessibilityLabel: 'Enter your full name' },
+    { label: 'Phone Number', key: 'phone', keyboardType: 'phone-pad', accessibilityLabel: 'Enter your phone number' },
+    { label: 'Address', key: 'address', accessibilityLabel: 'Enter your address' },
+    { label: 'Soil Type', key: 'soilType', accessibilityLabel: 'Enter your soil type' },
+    { label: 'Farm Area (in acres)', key: 'farmArea', keyboardType: 'numeric', accessibilityLabel: 'Enter your farm area in acres' },
+    { label: 'Referral Code', key: 'referralCode', accessibilityLabel: 'Enter your referral code' },
+    { label: 'Land Revenue Survey No', key: 'landRevenueSurveyNo', keyboardType: 'numeric', accessibilityLabel: 'Enter your land revenue survey number' },
   ];
 
   return (
-    <>
-      {signUpFields.map(({ label, key, secureTextEntry, keyboardType }) => (
-        <View style={styles.verticallySpaced} key={key}>
-          <Input
-            label={label}
-            labelStyle={styles.inputLabel}
-            leftIcon={{
-              type: "font-awesome",
-              name:
-                label === "Email"
-                  ? "envelope"
-                  : label === "Password"
-                  ? "lock"
-                  : label === "Full Name"
-                  ? "user"
-                  : label === "Phone Number"
-                  ? "phone"
-                  : label === "Address"
-                  ? "home"
-                  : label === "Soil Type"
-                  ? "leaf"
-                  : label === "Farm Area (in acres)"
-                  ? "tree"
-                  : label === "Referral Code"
-                  ? "tag"
-                  : "file-text",
-            }}
-            containerStyle={styles.inputContainer}
-            onChangeText={(value) =>
-              setSignUpData((prevData) => ({ ...prevData, [key]: value }))
-            }
-            value={signUpData[key as keyof SignUpData]}
-            secureTextEntry={secureTextEntry}
-            keyboardType={keyboardType}
-            placeholder={label}
-            placeholderTextColor="#aaaaaa"
-          />
-        </View>
+    <View>
+      <Image
+        source={{ uri: 'https://example.com/signup-illustration.png' }}
+        style={styles.illustration}
+        accessible={true}
+        accessibilityLabel="Decorative sign-up illustration"
+      />
+      {signUpFields.map(({ label, key, accessibilityLabel, ...rest }) => (
+        <FormField
+          key={key}
+          label={label}
+          value={signUpData[key as keyof SignUpData]}
+          onChangeText={(text) => setSignUpData({ ...signUpData, [key as keyof SignUpData]: text })}
+          accessibilityLabel={accessibilityLabel}
+          {...rest}
+        />
       ))}
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button title="Sign Up" disabled={loading} onPress={signUpUser} />
-      </View>
-    </>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={signUpUser}
+        disabled={loading}
+        accessible={true}
+        accessibilityLabel={loading ? "Signing up, please wait" : "Sign up button"}
+        accessibilityRole="button"
+      >
+        <LinearGradient
+          colors={['#4c669f', '#3b5998', '#192f6a']}
+          style={styles.buttonGradient}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Signing Up...' : 'Sign Up'}
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
+    </View>
   );
 };
 
-/**
- * Handle Sign-in
- */
-
-type SignInData = {
+interface SignInData {
   email: string;
   password: string;
-};
+}
 
-type SignInProps = {
+interface SignInProps {
   signInData: SignInData;
-  setSignInData: React.Dispatch<React.SetStateAction<SignInData>>;
-  signInUser: () => Promise<void>;
+  setSignInData: (data: SignInData) => void;
+  signInUser: () => void;
   loading: boolean;
-};
+}
 
-const SignIn: React.FC<SignInProps> = ({
-  signInData,
-  setSignInData,
-  signInUser,
-  loading,
-}) => {
+const SignIn: React.FC<SignInProps> = ({ signInData, setSignInData, signInUser, loading }) => {
   const signInFields = [
-    {
-      label: "Email",
-      key: "email",
-      keyboardType: "email-address" as KeyboardTypeOptions,
-    },
-    { label: "Password", key: "password", secureTextEntry: true },
+    { label: 'Email', key: 'email', keyboardType: 'email-address' as KeyboardTypeOptions, accessibilityLabel: 'Enter your email address' },
+    { label: 'Password', key: 'password', secureTextEntry: true, accessibilityLabel: 'Enter your password' },
   ];
 
   return (
-    <>
-      {signInFields.map(({ label, key, secureTextEntry, keyboardType }) => (
-        <View style={styles.verticallySpaced} key={key}>
-          <Input
-            label={label}
-            labelStyle={styles.inputLabel}
-            leftIcon={{
-              type: "font-awesome",
-              name: label === "Email" ? "envelope" : "lock",
-            }}
-            containerStyle={styles.inputContainer}
-            onChangeText={(value) =>
-              setSignInData((prevData) => ({ ...prevData, [key]: value }))
-            }
-            value={signInData[key as keyof SignInData]}
-            secureTextEntry={secureTextEntry}
-            keyboardType={keyboardType}
-            placeholder={label}
-            placeholderTextColor="#aaaaaa"
-          />
-        </View>
+    <View>
+      <Image
+        source={{ uri: 'https://example.com/signin-illustration.png' }}
+        style={styles.illustration}
+        accessible={true}
+        accessibilityLabel="Decorative sign-in illustration"
+      />
+      {signInFields.map(({ label, key, accessibilityLabel, ...rest }) => (
+        <FormField
+          key={key}
+          label={label}
+          value={signInData[key as keyof SignInData]}
+          onChangeText={(text) => setSignInData({ ...signInData, [key]: text })}
+          accessibilityLabel={accessibilityLabel}
+          {...rest}
+        />
       ))}
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button title="Sign In" disabled={loading} onPress={signInUser} />
-      </View>
-    </>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={signInUser}
+        disabled={loading}
+        accessible={true}
+        accessibilityLabel={loading ? "Signing in, please wait" : "Sign in button"}
+        accessibilityRole="button"
+      >
+        <LinearGradient
+          colors={['#4c669f', '#3b5998', '#192f6a']}
+          style={styles.buttonGradient}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Signing In...' : 'Sign In'}
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
+    </View>
   );
 };
 
-const Auth: React.FC = () => {
-  const [isSignUp, setIsSignUp] = useState(true);
-  const [signUpData, setSignUpData] = useState<SignUpData>({
-    email: "user@example.com",
-    password: "password123",
-    fullName: "user",
-    phone: "9999999999",
-    address: "123 Main St",
-    soilType: "Loamy",
-    farmArea: "256",
-    referralCode: "REF123",
-    landRevenueSurveyNo: "12345",
+const Auth = () => {
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [signUpData, setSignUpData] = useState({
+    email: '',
+    password: '',
+    fullName: '',
+    phone: '',
+    address: '',
+    soilType: '',
+    farmArea: '',
+    referralCode: '',
+    landRevenueSurveyNo: '',
   });
-  const [signInData, setSignInData] = useState<SignInData>({
-    email: "user@example.com",
-    password: "password123",
-  });
+  const [signInData, setSignInData] = useState<SignInData>({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
 
   const signUpUser = async () => {
     setLoading(true);
-    const { phone, farmArea, landRevenueSurveyNo } = signUpData;
-
-    // Validations
-    if (phone.length === 0 || isNaN(parseInt(phone, 10))) {
-      Alert.alert("Please enter a valid phone number.");
-      console.log("Please enter a valid phone number.");
-      setLoading(false);
-      return;
-    }
-
-    if (isNaN(parseInt(farmArea, 10))) {
-      Alert.alert("Please enter a valid farm area in numeric form.");
-      console.log("Please enter a valid farm area in numeric form.");
-      setLoading(false);
-      return;
-    }
-
-    if (isNaN(parseInt(landRevenueSurveyNo, 10))) {
-      Alert.alert("Please enter a valid land revenue survey number.");
-      console.log("Please enter a valid land revenue survey number.");
-      setLoading(false);
-      return;
-    }
-
-    const inputs = {
-      full_name: signUpData.fullName,
-      phone: parseInt(phone, 10),
-      address: signUpData.address,
-      soil_type: signUpData.soilType,
-      farm_area: parseInt(farmArea, 10),
-      referral_code: signUpData.referralCode,
-      land_revenue_survey_no: parseInt(landRevenueSurveyNo, 10),
-      predictions_count: 0,
-    };
-
     const { error } = await supabase.auth.signUp({
       email: signUpData.email,
       password: signUpData.password,
-      options: { data: inputs },
+      options: { data: signUpData },
     });
-
     setLoading(false);
     if (error) {
-      Alert.alert(error.message);
-      console.log(error.message);
-      return;
+      Alert.alert('Error', error.message);
+    } else {
+      Alert.alert('Success', 'Sign-up Successful');
     }
-
-    Alert.alert("Sign-up Successful");
-    console.log("Sign-up Successful");
   };
 
   const signInUser = async () => {
     setLoading(true);
-    const { email, password } = signInData;
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
+    const { error } = await supabase.auth.signInWithPassword(signInData);
     setLoading(false);
     if (error) {
-      Alert.alert(error.message);
-      console.log(error.message);
-      return;
+      Alert.alert('Error', error.message);
+    } else {
+      Alert.alert('Success', 'Sign-in Successful');
     }
-
-    Alert.alert("Sign-in Successful");
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={true}
-        bounces={false}
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
       >
-        {isSignUp ? (
-          <SignUp
-            signUpData={signUpData}
-            setSignUpData={setSignUpData}
-            signUpUser={signUpUser}
-            loading={loading}
-          />
-        ) : (
-          <SignIn
-            signInData={signInData}
-            setSignInData={setSignInData}
-            signInUser={signInUser}
-            loading={loading}
-          />
-        )}
-        <View style={[styles.verticallySpaced]}>
-          <Button
-            title={
-              isSignUp
-                ? "Already have Account. Sign IN"
-                : "Dont have an account. Sign-Up"
-            }
-            onPress={() => setIsSignUp(!isSignUp)}
-          />
-        </View>
-      </ScrollView>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.content}>
+            <Text style={styles.title} accessibilityRole="header">
+              {isSignUp ? 'Create Account' : 'Welcome Back'}
+            </Text>
+            {isSignUp ? (
+              <SignUp
+                signUpData={signUpData}
+                setSignUpData={setSignUpData}
+                signUpUser={signUpUser}
+                loading={loading}
+              />
+            ) : (
+              <SignIn
+                signInData={signInData}
+                setSignInData={setSignInData}
+                signInUser={signInUser}
+                loading={loading}
+              />
+            )}
+            <TouchableOpacity
+              style={styles.switchButton}
+              onPress={() => setIsSignUp(!isSignUp)}
+              accessible={true}
+              accessibilityLabel={isSignUp ? "Switch to sign in" : "Switch to sign up"}
+              accessibilityRole="button"
+            >
+              <Text style={styles.switchButtonText}>
+                {isSignUp
+                  ? 'Already have an account? Sign In'
+                  : "Don't have an account? Sign Up"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
   container: {
+    flex: 1,
+    backgroundColor: '#f0f4f8',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollContainer: {
     flexGrow: 1,
-    padding: 16,
-    width: "100%",
+    justifyContent: 'center',
   },
-  verticallySpaced: {
-    paddingVertical: 12,
-    alignSelf: "stretch",
+  content: {
+    padding: width * 0.05,
+    width: '100%',
   },
-  mt20: {
-    marginTop: 20,
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: height * 0.03,
+    textAlign: 'center',
+  },
+  fieldContainer: {
+    marginBottom: height * 0.02,
+  },
+  fieldLabel: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 5,
   },
   inputContainer: {
-    backgroundColor: "#f0f0f0",
+    borderBottomWidth: 0,
+    backgroundColor: '#fff',
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#cccccc",
+    paddingHorizontal: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
-  inputLabel: {
-    color: "#333333",
-    fontWeight: "bold",
+  inputText: {
+    color: '#333',
+  },
+  button: {
+    marginTop: height * 0.03,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  buttonGradient: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  switchButton: {
+    marginTop: height * 0.03,
+    alignItems: 'center',
+  },
+  switchButtonText: {
+    color: '#3b5998',
+    fontSize: 16,
+  },
+  illustration: {
+    width: '100%',
+    height: height * 0.2,
+    resizeMode: 'contain',
+    marginBottom: height * 0.03,
   },
 });
 

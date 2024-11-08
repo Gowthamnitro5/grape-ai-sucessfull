@@ -214,7 +214,6 @@ const OutputScreen = ({ route, navigation }: Props) => {
           </Animatable.View>
 
           <Animatable.View animation="fadeIn" delay={1500}>
-            //{" "}
             <Button
               mode="contained"
               onPress={downloadScreenContentAsPDF}

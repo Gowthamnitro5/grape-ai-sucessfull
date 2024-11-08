@@ -8,7 +8,7 @@ export interface Pest {
   leaf_eating_caterpillar: number;
 }
 
-const URL = "http://localhost:8000/describe";
+const URL = "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/describe"; // Direct endpoint URL
 
 export const describePest = async (data: Pest) => {
   try {
@@ -23,29 +23,34 @@ export const describePest = async (data: Pest) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.log(errorData);
-      throw Error(JSON.stringify(errorData));
+      console.error("API Error Data:", errorData);
+      throw new Error(JSON.stringify(errorData));
     }
-    return await response.text();
+
+    const result = await response.text();
+    console.log("Pest Description Result:", result); // Log the result for debugging
+    return result;
   } catch (error: any) {
-    throw Error(error);
+    console.error("Error during API call:", error.message || error);
+    throw new Error(error.message || error);
   }
 };
 
+// Example data with non-zero values to illustrate usage
 const data: Pest = {
-  disease: "string",
-  flea_beetle: 0,
-  thrips: 0,
-  mealybug: 0,
-  jassids: 0,
-  red_spider_mites: 0,
-  leaf_eating_caterpillar: 0,
+  disease: "powdery mildew", // Example disease, replace with actual case
+  flea_beetle: 5,
+  thrips: 2,
+  mealybug: 4,
+  jassids: 3,
+  red_spider_mites: 6,
+  leaf_eating_caterpillar: 7,
 };
 
-// describePest(data)
-//   .then((result) => {
-//     console.log("Prediction Result:", result);
-//   })
-//   .catch((error) => {
-//     console.error("Error during prediction:", error);
-//   });
+describePest(data)
+  .then((result) => {
+    console.log("Final Pest Description Result:", result);
+  })
+  .catch((error) => {
+    console.error("Error during prediction:", error);
+  });

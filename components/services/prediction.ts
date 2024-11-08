@@ -9,7 +9,7 @@ export interface Prediction {
   potassium: number;
 }
 
-const URL = "http://localhost:8000/predict";
+const URL = "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/predict"; // Removed docs#/default for direct endpoint
 
 export const predictionResult = async (data: Prediction) => {
   try {
@@ -24,30 +24,34 @@ export const predictionResult = async (data: Prediction) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.log(errorData);
-      throw Error(JSON.stringify(errorData));
+      console.log("API Error Data:", errorData);
+      throw new Error(JSON.stringify(errorData));
     }
-    return await response.json();
+
+    const result = await response.json();
+    console.log("Prediction Result:", result); // Log the result for debugging
+    return result;
   } catch (e: any) {
-    throw Error(e);
+    console.error("Error during API call:", e.message || e);
+    throw new Error(e.message || e);
   }
 };
 
 const data: Prediction = {
-  solar_radiation: 0,
-  humidity: 0,
-  conductivity: 0,
-  phosphorus: 0,
-  ph_value: 0,
-  temperature: 0,
-  nitrogen: 0,
-  potassium: 0,
+  solar_radiation: 50, // Example values, replace with actual data
+  humidity: 30,
+  conductivity: 0.5,
+  phosphorus: 20,
+  ph_value: 6.5,
+  temperature: 25,
+  nitrogen: 15,
+  potassium: 10,
 };
 
-// predictionResult(data)
-//   .then((result) => {
-//     console.log("Prediction Result:", result);
-//   })
-//   .catch((error) => {
-//     console.error("Error during prediction:", error);
-//   });
+predictionResult(data)
+  .then((result) => {
+    console.log("Final Prediction Result:", result);
+  })
+  .catch((error) => {
+    console.error("Error during prediction:", error);
+  });

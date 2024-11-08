@@ -3,8 +3,8 @@ import { View, StyleSheet, Image, Text, Dimensions } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { NavigationProp } from '@react-navigation/native';
 
-const { width } = Dimensions.get('window');
-const logoSize = width * 0.8; // Adjust the multiplier as needed
+const { width, height } = Dimensions.get('window');
+const logoSize = width * 0.3; // Adjust the multiplier as needed
 
 const SplashScreen = ({ navigation }: any) => {
   useEffect(() => {
@@ -40,9 +40,6 @@ const SplashScreen = ({ navigation }: any) => {
             />
           </View>
         </Animatable.View>
-
-
-
       </View>
 
       {/* Bottom Section */}
@@ -68,23 +65,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
+    paddingVertical: height * 0.05, // Adjust vertical padding based on screen height
   },
   topSection: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: height * 0.05, // Adjust top margin based on screen height
   },
   schoolContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: height * 0.03, // Adjust bottom margin based on screen height
   },
   schoolText: {
-    fontSize: 22,
+    fontSize: width * 0.06, // Adjust font size based on screen width
     fontWeight: 'bold',
     color: '#F48329',
-    marginBottom: 5,
+    marginBottom: height * 0.01, // Adjust bottom margin based on screen height
   },
   collegeText: {
-    fontSize: 22,
+    fontSize: width * 0.06, // Adjust font size based on screen width
     fontWeight: 'bold',
     color: '#F48329',
   },
@@ -98,24 +96,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    marginVertical: -90, // Negative margin to minimize vertical space
-    padding: 0,
+    marginVertical: height * 0.02, // Adjust vertical margin based on screen height
   },
   bottomSection: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: height * 0.05, // Adjust bottom margin based on screen height
   },
   poweredByContainer: {
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: height * 0.02, // Adjust bottom margin based on screen height
   },
   poweredByText: {
-    fontSize: 18,
+    fontSize: width * 0.045, // Adjust font size based on screen width
     color: '#000000',
-    marginBottom: 5,
+    marginBottom: height * 0.01, // Adjust bottom margin based on screen height
   },
   companyText: {
-    fontSize: 22,
+    fontSize: width * 0.055, // Adjust font size based on screen width
     fontWeight: 'bold',
     color: '#000000',
   },
@@ -123,11 +120,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footerText: {
-    fontSize: 12,
+    fontSize: width * 0.03, // Adjust font size based on screen width
     color: '#000000',
   },
 });
-
-
 
 export default SplashScreen;

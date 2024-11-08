@@ -31,6 +31,7 @@ export default function RootLayout() {
         component={Auth}
         options={{ headerShown: false }}
       />
+
       <Stack.Screen
         name="SplashScreen"
         component={SplashScreen}
