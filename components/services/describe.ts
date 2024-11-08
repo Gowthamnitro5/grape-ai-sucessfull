@@ -8,7 +8,8 @@ export interface Pest {
   leaf_eating_caterpillar: number;
 }
 
-const URL = "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/describe"; // Direct endpoint URL
+const URL =
+  "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/describe"; // Direct endpoint URL
 
 export const describePest = async (data: Pest) => {
   try {
@@ -37,20 +38,20 @@ export const describePest = async (data: Pest) => {
 };
 
 // Example data with non-zero values to illustrate usage
-const data: Pest = {
-  disease: "powdery mildew", // Example disease, replace with actual case
-  flea_beetle: 5,
-  thrips: 2,
-  mealybug: 4,
-  jassids: 3,
-  red_spider_mites: 6,
-  leaf_eating_caterpillar: 7,
-};
+// const data: Pest = {
+//   disease: "powdery mildew", // Example disease, replace with actual case
+//   flea_beetle: 5,
+//   thrips: 2,
+//   mealybug: 4,
+//   jassids: 3,
+//   red_spider_mites: 6,
+//   leaf_eating_caterpillar: 7,
+// };
 
-describePest(data)
-  .then((result) => {
-    console.log("Final Pest Description Result:", result);
-  })
-  .catch((error) => {
-    console.error("Error during prediction:", error);
-  });
+// describePest(data)
+//   .then((result) => {
+//     console.log("Final Pest Description Result:", result);
+//   })
+//   .catch((error) => {
+//     console.error("Error during prediction:", error);
+//   });

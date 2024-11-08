@@ -9,7 +9,8 @@ export interface Prediction {
   potassium: number;
 }
 
-const URL = "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/predict"; // Removed docs#/default for direct endpoint
+const URL =
+  "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/predict"; // Removed docs#/default for direct endpoint
 
 export const predictionResult = async (data: Prediction) => {
   try {
@@ -37,21 +38,21 @@ export const predictionResult = async (data: Prediction) => {
   }
 };
 
-const data: Prediction = {
-  solar_radiation: 50, // Example values, replace with actual data
-  humidity: 30,
-  conductivity: 0.5,
-  phosphorus: 20,
-  ph_value: 6.5,
-  temperature: 25,
-  nitrogen: 15,
-  potassium: 10,
-};
+// const data: Prediction = {
+//   solar_radiation: 50, // Example values, replace with actual data
+//   humidity: 30,
+//   conductivity: 0.5,
+//   phosphorus: 20,
+//   ph_value: 6.5,
+//   temperature: 25,
+//   nitrogen: 15,
+//   potassium: 10,
+// };
 
-predictionResult(data)
-  .then((result) => {
-    console.log("Final Prediction Result:", result);
-  })
-  .catch((error) => {
-    console.error("Error during prediction:", error);
-  });
+// predictionResult(data)
+//   .then((result) => {
+//     console.log("Final Prediction Result:", result);
+//   })
+//   .catch((error) => {
+//     console.error("Error during prediction:", error);
+//   });
