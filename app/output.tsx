@@ -10,11 +10,13 @@ import {
 } from "react-native-paper";
 import * as Animatable from "react-native-animatable";
 import HTML from "react-native-render-html";
-import RNHTMLtoPDF from "react-native-html-to-pdf";
-import { PermissionsAndroid } from "react-native";
+
 import { describePest, Pest } from "@/components/services/describe";
 import { RootStackParamList } from "./_layout";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Print from "expo-print";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 
 type Props = NativeStackScreenProps<RootStackParamList, "output">;
 
@@ -103,34 +105,20 @@ const OutputScreen = ({ route, navigation }: Props) => {
 
   const downloadScreenContentAsPDF = async () => {
     try {
-      if (Platform.OS === "android") {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-        );
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          Alert.alert(
-            "Permission Denied",
-            "You need to give storage permission to generate the PDF"
-          );
-          return;
-        }
-      }
-
-      const options = {
+      if (Platform.OS !== "android") return;
+      const fileUri = FileSystem.documentDirectory + `generated.pdf`;
+      const { uri } = await Print.printToFileAsync({
         html: htmlContent,
-        fileName: "OutputScreenContent",
-        directory: "Documents",
-      };
-
-      const file = await RNHTMLtoPDF.convert(options);
-      console.log(file.filePath);
-
-      // Removed the Share functionality
-      // await Share.open({
-      //   url: `file://${file.filePath}`,
-      //   type: 'application/pdf',
-      //   title: 'Output Screen Content',
-      // });
+        base64: false, // Set to true if you need the output in base64
+      });
+      await FileSystem.moveAsync({
+        from: uri,
+        to: fileUri,
+      });
+      console.log("PDF file created and saved at:", fileUri);
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileUri);
+      }
     } catch (error) {
       console.error("Error generating PDF:", error);
       Alert.alert("Error", "Failed to generate PDF");
