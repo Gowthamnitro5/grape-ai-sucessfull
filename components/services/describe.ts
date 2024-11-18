@@ -20,6 +20,7 @@ export const describePest = async (data: Pest) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
+      // signal: AbortSignal.timeout(15000),
     });
 
     if (!response.ok) {
@@ -29,7 +30,7 @@ export const describePest = async (data: Pest) => {
     }
 
     const result = await response.text();
-    console.log("Pest Description Result:", result); // Log the result for debugging
+    console.log("Pest Description Successful"); // Log the result for debugging
     return result;
   } catch (error: any) {
     console.error("Error during API call:", error.message || error);

@@ -74,7 +74,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
         longitude: location.coords.longitude.toString(),
       });
     } else {
-      console.log("Location permission not granted");
+      console.error("Location permission not granted");
       setLocation(null); // Handle denied location case
     }
   };
@@ -89,26 +89,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
           .eq("id", session.user.id)
           .single();
 
-        if (error) {
-          console.error(error);
-          return;
-        }
+        if (error) throw new Error(error.message);
 
-        if (data) {
-          const user: Profile = {
-            id: data?.id || "",
-            name: data?.full_name || "",
-            email: session.user.email || "",
-            phone: data?.phone?.toString(),
-            address: data?.address || "",
-            soilType: data?.soil_type || "",
-            farmArea: data?.farm_area?.toString() || "",
-            referralCode: data?.referral_code || "",
-            landRevenueSurveyNo: data?.land_revenue_survey_no?.toString() || "",
-            predictionsCount: data?.predictions_count || 0,
-          };
-          setUserProfile(user);
-        }
+        if (!data) throw new Error("Empty Response");
+
+        const user: Profile = {
+          id: data?.id || "",
+          name: data?.full_name || "",
+          email: session.user.email || "",
+          phone: data?.phone?.toString(),
+          address: data?.address || "",
+          soilType: data?.soil_type || "",
+          farmArea: data?.farm_area?.toString() || "",
+          referralCode: data?.referral_code || "",
+          landRevenueSurveyNo: data?.land_revenue_survey_no?.toString() || "",
+          predictionsCount: data?.predictions_count || 0,
+        };
+        setUserProfile(user);
+        console.log(user);
       } catch (error) {
         console.error(error);
       }
@@ -118,23 +116,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
   // Fetch User's predictions from database.
   const fetchHistory = async () => {
     const user_id = session?.user.id;
-    const { data, error } = await supabase
-      .from("predictions")
-      .select(
-        `
+    try {
+      const { data, error } = await supabase
+        .from("predictions")
+        .select(
+          `
         id,
         date,
         time,
         disease
         `
-      )
-      .eq("user_id", user_id);
-    if (error) {
-      console.error(error.message);
-      return;
+        )
+        .eq("user_id", user_id);
+
+      if (error) throw new Error(error.message);
+      if (!data) throw new Error("Empty Response");
+
+      const items = data as History[];
+      setUserHistory(items);
+      console.log(items);
+    } catch (error) {
+      console.error(error);
     }
-    const items = data as History[];
-    setUserHistory(items);
   };
 
   // Handle session changes
