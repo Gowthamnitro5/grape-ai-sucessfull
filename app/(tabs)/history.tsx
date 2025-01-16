@@ -24,6 +24,15 @@ interface HistoryScreenProps {
   navigation: NavigationProp<any>;
 }
 
+const plantDiseases: { [key: string]: string } = {
+  "Downy Mildew":
+    "This disease develops as yellow or brown blotches on the undersides of leaves, caused by water molds thriving in wet and cool conditions.",
+  "Powdery Mildew":
+    "Recognizable by its white, dusty coating on leaves and stems, this fungal infection prefers warm, dry environments but with high humidity.",
+  Anthracnose:
+    "Affects plants by creating dark, sunken lesions on fruits, stems, and leaves, often leading to tissue decay in warm and moist climates.",
+};
+
 const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const { width } = useWindowDimensions();
@@ -37,7 +46,6 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
 
   const handleDownload = (id: string) => {
     // Implement download logic here
-    console.log(`Downloading report for id: ${id}`);
   };
 
   const getColumnCount = (screenWidth: number) => {
@@ -58,45 +66,22 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
         <Card.Content>
           <View style={styles.cardHeader}>
             <View>
-              <Title style={styles.cardTitle}>{item.date}</Title>
-              <Paragraph style={styles.cardTime}>{item.time}</Paragraph>
+              <Title style={styles.cardTitle}>{item.disease}</Title>
+              <Paragraph style={styles.cardTime}>{item.date}</Paragraph>
             </View>
-            <IconButton
-              icon="download"
-              size={20}
-              onPress={() => handleDownload(item.id)}
-            />
           </View>
           <Paragraph style={styles.cardPrediction}>
-            Prediction: {item.disease}
+            {plantDiseases[item.disease]}
           </Paragraph>
         </Card.Content>
-        <Card.Actions style={styles.cardActions}>
-          <TouchableOpacity
-            style={styles.viewButton}
-            onPress={() =>
-              navigation.navigate("PredictionDetails", { id: item.id })
-            }
-          >
-            <MaterialCommunityIcons
-              name="eye"
-              size={18}
-              color={theme.colors.primary}
-            />
-            <Paragraph style={styles.viewButtonText}>View Details</Paragraph>
-          </TouchableOpacity>
-        </Card.Actions>
       </Card>
     </Animatable.View>
   );
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
-      <View style={styles.plumSurround}>
+    <SafeAreaView style={[styles.container, { backgroundColor: "#8E44AD" }]}>
+      <View style={{ top: 8 }}>
         <Searchbar
-          placeholder="Search history"
           onChangeText={handleSearch}
           value={searchQuery}
           style={styles.searchBar}
@@ -110,12 +95,6 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
         numColumns={columnCount}
         key={`column-${columnCount}`}
       />
-      <TouchableOpacity
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
-        onPress={() => navigation.navigate("Explore")}
-      >
-        <MaterialCommunityIcons name="plus" size={24} color="white" />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -125,25 +104,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   plumSurround: {
-    backgroundColor: "#8E4585", // Plum color
+    backgroundColor: "#8E4585",
     paddingHorizontal: 16,
     paddingTop: 40,
     paddingBottom: 16,
   },
   searchBar: {
     marginBottom: 8,
-    height: 40,
-    paddingVertical: 0,
+    height: 60,
+    paddingVertical: 1,
   },
   listContainer: {
     padding: 8,
-    paddingBottom: 80, // To account for FAB
+    paddingBottom: 80,
   },
   gridItem: {
     padding: 4,
   },
   card: {
-    height: 180,
+    backgroundColor: "#FCF3CF",
+    height: 210,
   },
   cardHeader: {
     flexDirection: "row",
@@ -153,13 +133,17 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 14,
     fontWeight: "bold",
+    color: "#D35400",
   },
   cardTime: {
     fontSize: 12,
-    color: "#888",
+    color: "#2ECC71",
+    fontWeight: "bold",
   },
   cardPrediction: {
-    fontSize: 13,
+    color: "#2C3E50",
+    fontSize: 12,
+    fontWeight: "bold",
     marginVertical: 4,
   },
   cardDetails: {

@@ -11,7 +11,7 @@ const Tab = createBottomTabNavigator();
 
 export default function TabLayout() {
   return (
-    <Tab.Navigator initialRouteName="home">
+    <Tab.Navigator initialRouteName="Home">
       <Tab.Screen
         name="Home"
         component={HomeScreen}
@@ -26,6 +26,7 @@ export default function TabLayout() {
         name="Prediction"
         component={Explore}
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="batch-prediction" size={size} color={color} />
           ),
@@ -35,6 +36,7 @@ export default function TabLayout() {
         name="History"
         component={HistoryScreen}
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <AntDesign name="clockcircle" size={size} color={color} />
           ),
@@ -44,6 +46,7 @@ export default function TabLayout() {
         name="Profile"
         component={Profile}
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <FontAwesome6 name="user-gear" size={size} color={color} />
           ),

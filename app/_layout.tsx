@@ -7,6 +7,7 @@ import SplashScreen from "./SplashScreen";
 import OutputScreen from "./output";
 import { DataProvider } from "@/components/services/DataService";
 import { Prediction } from "@/components/services/prediction";
+import { NavigationContainer } from "@react-navigation/native";
 
 export type RootStackParamList = {
   "(tabs)": undefined;
@@ -20,31 +21,33 @@ export default function RootLayout() {
 
   return (
     <DataProvider>
-      <Stack.Navigator initialRouteName="SplashScreen">
-        <Stack.Screen
-          name="(tabs)"
-          component={TabLayout}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="auth"
-          component={Auth}
-          options={{ headerShown: false }}
-        />
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="SplashScreen">
+          <Stack.Screen
+            name="(tabs)"
+            component={TabLayout}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="auth"
+            component={Auth}
+            options={{ headerShown: false }}
+          />
 
-        <Stack.Screen
-          name="SplashScreen"
-          component={SplashScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="output"
-          component={OutputScreen}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
+          <Stack.Screen
+            name="SplashScreen"
+            component={SplashScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="output"
+            component={OutputScreen}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
     </DataProvider>
   );
 }

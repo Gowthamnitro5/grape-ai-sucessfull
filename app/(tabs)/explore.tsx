@@ -100,6 +100,7 @@ const Explore = ({ navigation }: any) => {
                   style={styles.input}
                   mode="outlined"
                   placeholder={getGuideline(key as keyof typeof inputs)}
+                  keyboardType="numeric"
                 />
                 <HelperText
                   type="info"

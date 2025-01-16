@@ -18,6 +18,7 @@ import { KeyboardTypeOptions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 const { width, height } = Dimensions.get("window");
+const logoSize = width * 0.5; // Adjust the multiplier as needed
 
 interface FormFieldProps {
   label: string;
@@ -115,12 +116,6 @@ const SignUp: React.FC<SignUpProps> = ({
 
   return (
     <View>
-      <Image
-        source={{ uri: "https://example.com/signup-illustration.png" }}
-        style={styles.illustration}
-        accessible={true}
-        accessibilityLabel="Decorative sign-up illustration"
-      />
       {signUpFields.map(({ label, key, accessibilityLabel, ...rest }) => (
         <FormField
           key={key}
@@ -191,12 +186,6 @@ const SignIn: React.FC<SignInProps> = ({
 
   return (
     <View>
-      <Image
-        source={{ uri: "https://example.com/signin-illustration.png" }}
-        style={styles.illustration}
-        accessible={true}
-        accessibilityLabel="Decorative sign-in illustration"
-      />
       {signInFields.map(({ label, key, accessibilityLabel, ...rest }) => (
         <FormField
           key={key}
@@ -308,8 +297,9 @@ const Auth = () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword(signInData);
     if (error) {
-      Alert.alert(error.message);
+      Alert.alert(error.name, error.message);
       console.error(error.message);
+      console.log(error.name);
     }
     setLoading(false);
   };
@@ -329,6 +319,11 @@ const Auth = () => {
             <Text style={styles.title} accessibilityRole="header">
               {isSignUp ? "Create Account" : "Welcome Back"}
             </Text>
+            <Image
+              source={require("@/assets/images/revauniversity.png")}
+              style={[styles.logo, { width: logoSize, height: logoSize }]}
+              resizeMode="contain"
+            />
             {isSignUp ? (
               <SignUp
                 signUpData={signUpData}
@@ -386,7 +381,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: height * 0.03,
+    marginBottom: height * 0.05,
     textAlign: "center",
   },
   fieldContainer: {
@@ -438,6 +433,9 @@ const styles = StyleSheet.create({
     height: height * 0.2,
     resizeMode: "contain",
     marginBottom: height * 0.03,
+  },
+  logo: {
+    alignSelf: "center"
   },
 });
 
