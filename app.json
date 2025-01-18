@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "runtimeVersion": "1.0.0",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gowtham23s.grapeai"
@@ -28,10 +29,7 @@
       "output": "static",
       "favicon": "./assets/images/grapeai.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font"
-    ],
+    "plugins": ["expo-router", "expo-font"],
     "experiments": {
       "typedRoutes": true
     },
@@ -40,6 +38,9 @@
         "projectId": "7431c495-f4c5-4989-9ab8-62b036831188"
       }
     },
-    "owner": "gowtham23s"
+    "owner": "gowtham23s",
+    "updates": {
+      "url": "https://u.expo.dev/7431c495-f4c5-4989-9ab8-62b036831188"
+    }
   }
 }
