@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 export interface Pest {
   disease: string;
   flea_beetle: number;
@@ -9,7 +11,9 @@ export interface Pest {
 }
 
 const URL =
-  "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/describe"; // Direct endpoint URL
+  Platform.OS === "android"
+    ? "https://smart-randomly-treefrog.ngrok-free.app/describe"
+    : "http://localhost:8000/describe";
 
 export const describePest = async (data: Pest) => {
   try {

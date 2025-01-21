@@ -22,7 +22,7 @@ interface Profile {
   predictionsCount?: number;
 }
 
-interface History {
+export interface History {
   id: string;
   date: string;
   time: string;

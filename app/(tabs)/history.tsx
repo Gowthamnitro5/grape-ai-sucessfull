@@ -3,26 +3,25 @@ import {
   View,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   useWindowDimensions,
   SafeAreaView,
+  StatusBar,
+  Text,
 } from "react-native";
 import {
   Card,
   Title,
   Paragraph,
-  IconButton,
   useTheme,
   Searchbar,
 } from "react-native-paper";
 import * as Animatable from "react-native-animatable";
 import { NavigationProp } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useDataService } from "@/components/services/DataService";
-
 interface HistoryScreenProps {
   navigation: NavigationProp<any>;
 }
+import { History } from "@/components/services/DataService";
 
 const plantDiseases: { [key: string]: string } = {
   "Downy Mildew":
@@ -33,25 +32,45 @@ const plantDiseases: { [key: string]: string } = {
     "Affects plants by creating dark, sunken lesions on fruits, stems, and leaves, often leading to tissue decay in warm and moist climates.",
 };
 
+// Grape-inspired theme colors
+const COLORS = {
+  primary: "#6B2C70", // Deep purple grape
+  secondary: "#9A4C95", // Light purple grape
+  background: "#F8F4F9", // Very light purple
+  card: "#F0E6F5", // Light grape tint
+  text: "#4A1D4E", // Dark grape
+  accent: "#8E3C8B", // Medium grape
+  timestamp: "#7D2F82", // Grape burgundy
+  headerBg: "#3D1440", // Extra deep purple for header
+};
+
 const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [filteredHistory, setFilteredHistory] = useState<any[]>([]);
   const { width } = useWindowDimensions();
   const theme = useTheme();
   const { userHistory } = useDataService();
+  const statusBarHeight = StatusBar.currentHeight || 0;
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    // Implement search logic here if needed
-  };
+  useEffect(() => {
+    filterHistory(searchQuery);
+  }, [searchQuery, userHistory]);
 
-  const handleDownload = (id: string) => {
-    // Implement download logic here
+  const filterHistory = (query: string) => {
+    const lowercaseQuery = query.toLowerCase();
+    const filtered = userHistory!.filter((item: History) => {
+      const matchDisease = item.disease.toLowerCase().includes(lowercaseQuery);
+      const matchDate = item.date.toLowerCase().includes(lowercaseQuery);
+      return matchDisease || matchDate;
+    });
+    setFilteredHistory(filtered);
   };
 
   const getColumnCount = (screenWidth: number) => {
-    if (screenWidth >= 768) return 3; // Tablet or larger
-    if (screenWidth >= 480) return 2; // Large phones
-    return 1; // Small phones
+    if (screenWidth >= 1024) return 4;
+    if (screenWidth >= 768) return 3;
+    if (screenWidth >= 480) return 2;
+    return 1;
   };
 
   const columnCount = getColumnCount(width);
@@ -60,15 +79,13 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
     <Animatable.View
       animation="fadeIn"
       duration={500}
-      style={[styles.gridItem, { width: `${100 / columnCount}%` }]}
+      style={[styles.gridItem, { width: width / columnCount - 16 }]}
     >
       <Card style={styles.card}>
         <Card.Content>
           <View style={styles.cardHeader}>
-            <View>
-              <Title style={styles.cardTitle}>{item.disease}</Title>
-              <Paragraph style={styles.cardTime}>{item.date}</Paragraph>
-            </View>
+            <Title style={styles.cardTitle}>{item.disease}</Title>
+            <Paragraph style={styles.cardTime}>{item.date}</Paragraph>
           </View>
           <Paragraph style={styles.cardPrediction}>
             {plantDiseases[item.disease]}
@@ -79,23 +96,36 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: "#8E44AD" }]}>
-      <View style={{ top: 8 }}>
-        <Searchbar
-          onChangeText={handleSearch}
-          value={searchQuery}
-          style={styles.searchBar}
-        />
+    <View style={styles.container}>
+      {/* <StatusBar backgroundColor={COLORS.headerBg} barStyle="light-content" /> */}
+      <View>
+        <View style={styles.header}>
+          <Text style={styles.title}>GrapeAI</Text>
+        </View>
       </View>
-      <FlatList
-        data={userHistory}
-        renderItem={renderHistoryItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
-        numColumns={columnCount}
-        key={`column-${columnCount}`}
-      />
-    </SafeAreaView>
+      <SafeAreaView style={{ backgroundColor: COLORS.background }}>
+        <View style={styles.searchContainer}>
+          <Searchbar
+            placeholder="Search by disease or date..."
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={styles.searchBar}
+            iconColor={COLORS.primary}
+            inputStyle={{ color: COLORS.text }}
+            placeholderTextColor={COLORS.secondary}
+          />
+        </View>
+        <FlatList
+          data={filteredHistory}
+          renderItem={renderHistoryItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContainer}
+          numColumns={columnCount}
+          key={`column-${columnCount}`}
+          showsVerticalScrollIndicator={false}
+        />
+      </SafeAreaView>
+    </View>
   );
 };
 
@@ -103,76 +133,71 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  plumSurround: {
-    backgroundColor: "#8E4585",
+  topContainer: {
+    backgroundColor: COLORS.background,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.card,
+    zIndex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 20,
+    marginBottom: 10,
+    backgroundColor: COLORS.primary,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "white",
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  searchContainer: {
     paddingHorizontal: 16,
-    paddingTop: 40,
-    paddingBottom: 16,
+    paddingTop: 5,
+    paddingBottom: 5,
   },
   searchBar: {
-    marginBottom: 8,
-    height: 60,
-    paddingVertical: 1,
+    backgroundColor: "white",
+    elevation: 2,
+    borderRadius: 10,
+    height: 45,
   },
   listContainer: {
     padding: 8,
     paddingBottom: 80,
   },
   gridItem: {
-    padding: 4,
+    padding: 8,
   },
   card: {
     backgroundColor: "#FCF3CF",
-    height: 210,
+    borderRadius: 12,
+    elevation: 2,
+    height: 220,
   },
   cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexDirection: "column",
+    gap: 4,
   },
   cardTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#D35400",
   },
   cardTime: {
     fontSize: 12,
     color: "#2ECC71",
-    fontWeight: "bold",
+    fontWeight: "500",
   },
   cardPrediction: {
     color: "#2C3E50",
-    fontSize: 12,
-    fontWeight: "bold",
-    marginVertical: 4,
-  },
-  cardDetails: {
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  cardActions: {
-    justifyContent: "flex-start",
-  },
-  viewButton: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  viewButtonText: {
-    marginLeft: 4,
-    color: "#007AFF",
-    fontSize: 12,
-  },
-  fab: {
-    position: "absolute",
-    margin: 16,
-    right: 0,
-    bottom: 0,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 4,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 12,
   },
 });
 

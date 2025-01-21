@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 export interface Prediction {
   solar_radiation: number;
   humidity: number;
@@ -10,7 +12,9 @@ export interface Prediction {
 }
 
 const URL =
-  "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/predict"; // Removed docs#/default for direct endpoint
+  Platform.OS === "android"
+    ? "https://smart-randomly-treefrog.ngrok-free.app/predict"
+    : "http://localhost:8000/predict";
 
 export const predictionResult = async (data: Prediction) => {
   try {
@@ -34,7 +38,7 @@ export const predictionResult = async (data: Prediction) => {
     return result;
   } catch (e: any) {
     console.error("Error during API call:", e.message || e);
-    throw new Error(e.message || e);
+    // throw new Error(e.message || e);
   }
 };
 

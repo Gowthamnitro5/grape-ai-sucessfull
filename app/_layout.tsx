@@ -8,6 +8,7 @@ import OutputScreen from "./output";
 import { DataProvider } from "@/components/services/DataService";
 import { Prediction } from "@/components/services/prediction";
 import { NavigationContainer } from "@react-navigation/native";
+import { StatusBar } from "react-native";
 
 export type RootStackParamList = {
   "(tabs)": undefined;
@@ -22,6 +23,7 @@ export default function RootLayout() {
   return (
     <DataProvider>
       <NavigationContainer>
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" />
         <Stack.Navigator initialRouteName="SplashScreen">
           <Stack.Screen
             name="(tabs)"
