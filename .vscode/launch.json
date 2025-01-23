@@ -9,6 +9,12 @@
       "name": "Expo- Tunnel",
       "request": "launch",
       "type": "node-terminal"
+    },
+    {
+      "command": "bun expo start -c -d",
+      "name": "Dev Client",
+      "request": "launch",
+      "type": "node-terminal"
     }
   ]
 }

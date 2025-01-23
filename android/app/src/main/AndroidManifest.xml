@@ -28,7 +28,7 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="GrapeAI"/>
+        <data android:scheme="grapeai"/>
         <data android:scheme="com.gowtham23s.grapeai"/>
         <data android:scheme="exp+grapeai"/>
       </intent-filter>

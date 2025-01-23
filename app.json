@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/grapeai.png",
-    "scheme": "GrapeAI",
+    "scheme": "grapeai",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/grapeai.png",
@@ -29,7 +29,11 @@
       "output": "static",
       "favicon": "./assets/images/grapeai.png"
     },
-    "plugins": ["expo-router", "expo-font"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "@react-native-google-signin/google-signin"
+    ],
     "experiments": {
       "typedRoutes": true
     },

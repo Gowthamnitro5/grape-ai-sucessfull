@@ -4,4 +4,5 @@
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
   <string name="expo_system_ui_user_interface_style" translatable="false">automatic</string>
   <string name="expo_runtime_version">1.0.0</string>
+  <string name="server_client_id">76980460244-9524183srf8njjipd98h3snetrdon3ub.apps.googleusercontent.com</string>
 </resources>
