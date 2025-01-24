@@ -12,7 +12,7 @@ import * as Animatable from "react-native-animatable";
 import HTML from "react-native-render-html";
 
 import { describePest, Pest } from "@/components/services/describe";
-import { RootStackParamList } from "./_layout";
+import { RootStackParamList } from ".";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system";

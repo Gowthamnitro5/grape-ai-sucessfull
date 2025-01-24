@@ -22,8 +22,8 @@ export default function RootLayout() {
 
   return (
     <DataProvider>
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" />
       <NavigationContainer>
-        <StatusBar barStyle="dark-content" backgroundColor="transparent" />
         <Stack.Navigator initialRouteName="SplashScreen">
           <Stack.Screen
             name="(tabs)"
