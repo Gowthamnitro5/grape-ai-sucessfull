@@ -9,7 +9,6 @@ import { DataProvider } from "@/components/services/DataService";
 import { Prediction } from "@/components/services/prediction";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "react-native";
-import GoogleAuth from "@/components/supabase/GoogleAuth";
 
 export type RootStackParamList = {
   "(tabs)": undefined;
@@ -35,7 +34,7 @@ export default function RootLayout() {
           />
           <Stack.Screen
             name="auth"
-            component={GoogleAuth}
+            component={Auth}
             options={{ headerShown: false }}
           />
 

@@ -106,7 +106,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
           predictionsCount: data?.predictions_count || 0,
         };
         setUserProfile(user);
-        console.log(user);
       } catch (error) {
         console.error(error);
       }
@@ -134,7 +133,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const items = data as History[];
       setUserHistory(items);
-      console.log(items);
     } catch (error) {
       console.error(error);
     }

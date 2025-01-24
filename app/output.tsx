@@ -61,9 +61,9 @@ const OutputScreen = ({ route, navigation }: Props) => {
 
   const generateScreenContentHTML = () => {
     if (!prediction || llmAnalysis) return;
-    return `
-      <main>
-        <style>
+    return `<html>
+        <head>
+          <style>
             body { font-family: Arial, sans-serif; }
             .title { font-size: 24px; color: #8E44AD; text-align: center; }
             .card { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
@@ -73,43 +73,46 @@ const OutputScreen = ({ route, navigation }: Props) => {
             .bar-wrapper { flex: 1; }
             .bar { height: 20px; background-color: #8E44AD; border-radius: 10px; }
             .probability-text { margin-left: 10px; }
-        </style>
-        <h1 class="title">Prediction Results</h1>
+          </style>
+        </head>
+        <body>
+          <h1 class="title">Prediction Results</h1>
   
-        <div class="card">
-          <h2 class="card-title">Predicted Disease</h2>
-          <p>${prediction.disease}</p>
-        </div>
-
-        <div class="card">
-          <h2 class="card-title">Pest Attack Probabilities</h2>
-          ${Object.entries({
-            flea_beetle: prediction.flea_beetle,
-            thrips: prediction.thrips,
-            mealybug: prediction.mealybug,
-            jassids: prediction.jassids,
-            red_spider_mites: prediction.red_spider_mites,
-            leaf_eating_caterpillar: prediction.leaf_eating_caterpillar,
-          })
-            .map(
-              ([pest, probability]) => `
-            <div class="bar-container">
-              <div class="bar-label">${pest.replace(/_/g, " ")}</div>
-              <div class="bar-wrapper">
-                <div class="bar" style="width: ${probability}%;"></div>
+          <div class="card">
+            <h2 class="card-title">Predicted Disease</h2>
+            <p>${prediction.disease}</p>
+          </div>
+  
+          <div class="card">
+            <h2 class="card-title">Pest Attack Probabilities</h2>
+            ${Object.entries({
+              flea_beetle: prediction.flea_beetle,
+              thrips: prediction.thrips,
+              mealybug: prediction.mealybug,
+              jassids: prediction.jassids,
+              red_spider_mites: prediction.red_spider_mites,
+              leaf_eating_caterpillar: prediction.leaf_eating_caterpillar,
+            })
+              .map(
+                ([pest, probability]) => `
+              <div class="bar-container">
+                <div class="bar-label">${pest.replace(/_/g, " ")}</div>
+                <div class="bar-wrapper">
+                  <div class="bar" style="width: ${probability}%;"></div>
+                </div>
+                <span class="probability-text">${probability}</span>
               </div>
-              <span class="probability-text">${probability}</span>
-            </div>
-          `
-            )
-            .join("")}
-        </div>
-
-        <div class="card">
-          <h2 class="card-title">Detailed Analysis</h2>
-          ${llmAnalysis}
-        </div>
-      </main>
+            `
+              )
+              .join("")}
+          </div>
+  
+          <div class="card">
+            <h2 class="card-title">Detailed Analysis</h2>
+            ${llmAnalysis}
+          </div>
+        </body>
+      </html>
     `;
   };
 
@@ -117,41 +120,40 @@ const OutputScreen = ({ route, navigation }: Props) => {
 
   const SavePrediction = async () => {
     try {
-      console.log("Save Button is pressed");
-
+      fileUri = FileSystem.documentDirectory + `generated.pdf`;
       if (Platform.OS === "android") {
-        fileUri = FileSystem.documentDirectory + `generated.pdf`;
         const { uri } = await Print.printToFileAsync({
           html: htmlContent,
           base64: false,
         });
-        await FileSystem.moveAsync({
-          from: uri,
-          to: fileUri,
-        });
-        console.log("PDF file created and saved at : ", fileUri);
-      }
+        // await FileSystem.moveAsync({
+        //   from: uri,
+        //   to: fileUri,
+        // });
 
-      //saving the prediction to database.
-      if (session?.user.id && prediction?.disease) {
-        const { error } = await supabase.from("predictions").insert({
-          user_id: session.user.id,
-          disease: prediction.disease,
-          pdf_uri: fileUri,
-        });
-        if (error) {
-          throw new Error(error.message);
+        //saving the prediction to database.
+        if (session?.user.id && prediction?.disease) {
+          const { error } = await supabase.from("predictions").insert({
+            user_id: session.user.id,
+            disease: prediction.disease,
+            pdf_uri: uri,
+          });
+          if (error) {
+            throw new Error(error.message);
+          }
+          await fetchProfile();
+          await fetchHistory();
         }
-        await fetchProfile();
-        await fetchHistory();
-      }
 
-      // Sharing the file.
-      if ((await Sharing.isAvailableAsync()) && Platform.OS === "android") {
-        await Sharing.shareAsync(fileUri);
+        // Sharing the file.
+        if ((await Sharing.isAvailableAsync()) && Platform.OS === "android") {
+          await Sharing.shareAsync(uri, {
+            UTI: ".pdf",
+            mimeType: "application/pdf",
+          });
+        }
+        console.log("PDF file created and saved at : ", uri);
       }
-
-      console.log("Saved the file successfully");
     } catch (error) {
       console.error(error);
       Alert.alert("Server issue.", "Please try later ..");

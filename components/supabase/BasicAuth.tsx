@@ -16,6 +16,7 @@ import { profile as SignUpData, supabase } from "@/utils/supabase";
 import { Input } from "@rneui/themed";
 import { KeyboardTypeOptions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import GoogleAuth from "./GoogleAuth";
 
 const { width, height } = Dimensions.get("window");
 const logoSize = width * 0.5; // Adjust the multiplier as needed
@@ -321,7 +322,14 @@ const Auth = () => {
             </Text>
             <Image
               source={require("@/assets/images/revauniversity.png")}
-              style={[styles.logo, { width: logoSize, height: logoSize }]}
+              style={[
+                styles.logo,
+                {
+                  width: logoSize,
+                  height: logoSize,
+                  marginBottom: height * 0.005,
+                },
+              ]}
               resizeMode="contain"
             />
             {isSignUp ? (
@@ -353,6 +361,7 @@ const Auth = () => {
                   ? "Already have an account? Sign In"
                   : "Don't have an account? Sign Up"}
               </Text>
+              <GoogleAuth />
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -381,7 +390,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: height * 0.05,
+    marginBottom: height * 0.005,
     textAlign: "center",
   },
   fieldContainer: {
@@ -435,7 +444,7 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.03,
   },
   logo: {
-    alignSelf: "center"
+    alignSelf: "center",
   },
 });
 
