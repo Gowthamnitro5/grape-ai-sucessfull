@@ -321,7 +321,7 @@ const Auth = () => {
               {isSignUp ? "Create Account" : "Welcome Back"}
             </Text>
             <Image
-              source={require("@/assets/images/revauniversity.png")}
+              source={require("@/assets/images/grapeai.png")}
               style={[
                 styles.logo,
                 {
@@ -361,8 +361,10 @@ const Auth = () => {
                   ? "Already have an account? Sign In"
                   : "Don't have an account? Sign Up"}
               </Text>
-              <GoogleAuth />
             </TouchableOpacity>
+            <View style={{ marginTop: height * 0.02, alignItems: "center" }}>
+              <GoogleAuth />
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

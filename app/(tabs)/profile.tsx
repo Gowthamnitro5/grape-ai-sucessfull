@@ -119,7 +119,7 @@ const Profile = ({ navigation }: any) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Image
-        source={{ uri: "@/assets/images/grappy" }}
+        source={require("@/assets/images/grappy.jpg")}
         style={[styles.image, { height: isSmallScreen ? 150 : 200 }]}
       />
       <Card style={styles.card}>

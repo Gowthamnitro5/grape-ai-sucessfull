@@ -60,9 +60,8 @@ const OutputScreen = ({ route, navigation }: Props) => {
   };
 
   const generateScreenContentHTML = () => {
-    if (!prediction || llmAnalysis) return;
-    return `<html>
-        <head>
+    if (!prediction) return;
+    return `
           <style>
             body { font-family: Arial, sans-serif; }
             .title { font-size: 24px; color: #8E44AD; text-align: center; }
@@ -74,7 +73,6 @@ const OutputScreen = ({ route, navigation }: Props) => {
             .bar { height: 20px; background-color: #8E44AD; border-radius: 10px; }
             .probability-text { margin-left: 10px; }
           </style>
-        </head>
         <body>
           <h1 class="title">Prediction Results</h1>
   
@@ -106,11 +104,6 @@ const OutputScreen = ({ route, navigation }: Props) => {
               )
               .join("")}
           </div>
-  
-          <div class="card">
-            <h2 class="card-title">Detailed Analysis</h2>
-            ${llmAnalysis}
-          </div>
         </body>
       </html>
     `;
@@ -121,38 +114,27 @@ const OutputScreen = ({ route, navigation }: Props) => {
   const SavePrediction = async () => {
     try {
       fileUri = FileSystem.documentDirectory + `generated.pdf`;
+
       if (Platform.OS === "android") {
         const { uri } = await Print.printToFileAsync({
           html: htmlContent,
           base64: false,
         });
-        // await FileSystem.moveAsync({
-        //   from: uri,
-        //   to: fileUri,
-        // });
 
-        //saving the prediction to database.
-        if (session?.user.id && prediction?.disease) {
-          const { error } = await supabase.from("predictions").insert({
-            user_id: session.user.id,
-            disease: prediction.disease,
-            pdf_uri: uri,
-          });
-          if (error) {
-            throw new Error(error.message);
-          }
-          await fetchProfile();
-          await fetchHistory();
-        }
+        await FileSystem.moveAsync({
+          from: uri,
+          to: fileUri,
+        });
 
         // Sharing the file.
         if ((await Sharing.isAvailableAsync()) && Platform.OS === "android") {
-          await Sharing.shareAsync(uri, {
+          await Sharing.shareAsync(fileUri, {
             UTI: ".pdf",
             mimeType: "application/pdf",
           });
         }
-        console.log("PDF file created and saved at : ", uri);
+
+        console.log("PDF file created and saved at : ", fileUri);
       }
     } catch (error) {
       console.error(error);
@@ -171,7 +153,7 @@ const OutputScreen = ({ route, navigation }: Props) => {
             <Card style={styles.card}>
               <Card.Content>
                 <Title>Predicted Disease</Title>
-                {loading ? (
+                {!prediction ? (
                   <ActivityIndicator animating={true} color="#8E44AD" />
                 ) : (
                   <Paragraph>{prediction?.disease}</Paragraph>
@@ -184,7 +166,7 @@ const OutputScreen = ({ route, navigation }: Props) => {
             <Card style={styles.card}>
               <Card.Content>
                 <Title>Pest Attack Probabilities</Title>
-                {loading ? (
+                {!prediction ? (
                   <ActivityIndicator animating={true} color="#8E44AD" />
                 ) : (
                   <View style={styles.chartContainer}>
@@ -241,7 +223,23 @@ const OutputScreen = ({ route, navigation }: Props) => {
           <Animatable.View animation="fadeIn" delay={1200}>
             <Button
               mode="contained"
-              onPress={() => navigation.navigate("(tabs)")}
+              onPress={async () => {
+                //saving the prediction to database.
+                if (session?.user.id && prediction?.disease) {
+                  const { error } = await supabase.from("predictions").insert({
+                    user_id: session.user.id,
+                    disease: prediction.disease,
+                    pdf_uri: fileUri,
+                  });
+                  if (error) {
+                    Alert.alert(error?.message);
+                    throw new Error(error.message);
+                  }
+                  await fetchProfile();
+                  await fetchHistory();
+                }
+                navigation.navigate("(tabs)");
+              }}
               style={styles.button}
               labelStyle={styles.buttonLabel}
             >

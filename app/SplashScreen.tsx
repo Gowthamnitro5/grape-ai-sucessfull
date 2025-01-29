@@ -1,41 +1,64 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, Image, Text, Dimensions } from 'react-native';
-import * as Animatable from 'react-native-animatable';
-import { NavigationProp } from '@react-navigation/native';
+import React, { useEffect } from "react";
+import {
+  View,
+  StyleSheet,
+  Image,
+  Text,
+  Dimensions,
+  SafeAreaView,
+} from "react-native";
+import * as Animatable from "react-native-animatable";
+import { NavigationProp } from "@react-navigation/native";
 
-const { width, height } = Dimensions.get('window');
-const logoSize = width * 0.3; // Adjust the multiplier as needed
+// Get screen dimensions and set responsive values
+const { width, height } = Dimensions.get("window");
+const logoSize = Math.min(width * 0.25, height * 0.15);
+const minLogoSize = 80;
+const finalLogoSize = Math.max(logoSize, minLogoSize);
 
 const SplashScreen = ({ navigation }: any) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.navigate('auth');
+      navigation.navigate("auth");
     }, 5000);
 
     return () => clearTimeout(timer);
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Top Section */}
       <View style={styles.topSection}>
         {/* School Section with Orange Styling */}
-        <Animatable.View animation="fadeIn" delay={500} duration={1500} style={styles.schoolContainer}>
-          <Text style={styles.schoolText}>School Of EEE</Text>
-          <Text style={styles.collegeText}>REVA University</Text>
+        <Animatable.View
+          animation="fadeIn"
+          delay={500}
+          duration={1500}
+          style={styles.schoolContainer}
+        >
+          <View style={styles.textWrapper}>
+            <Text style={styles.schoolText}>School Of EEE</Text>
+          </View>
+          <View style={styles.textWrapper}>
+            <Text style={styles.collegeText}>REVA University</Text>
+          </View>
         </Animatable.View>
 
-        {/* Center Logos (Government and other logo) */}
-        <Animatable.View animation="zoomIn" duration={1500} style={styles.centerLogosContainer}>
-          <View style={styles.logosColumn}>
+        {/* Center Logos (Side by side) */}
+        <Animatable.View
+          animation="zoomIn"
+          duration={1500}
+          style={styles.centerLogosContainer}
+        >
+          <View style={styles.logosRow}>
             <Image
-              source={require('@/assets/images/nrdc.png')}
-              style={[styles.logo, { width: logoSize, height: logoSize }]}
+              source={require("@/assets/images/nrdc.png")}
+              style={[styles.logo]}
               resizeMode="contain"
             />
             <Image
-              source={require('@/assets/images/revauniversity.png')}
-              style={[styles.logo, { width: logoSize, height: logoSize }]}
+              source={require("@/assets/images/revauniversity.png")}
+              style={[styles.logo]}
               resizeMode="contain"
             />
           </View>
@@ -45,83 +68,111 @@ const SplashScreen = ({ navigation }: any) => {
       {/* Bottom Section */}
       <View style={styles.bottomSection}>
         {/* Powered By Section */}
-        <Animatable.View animation="fadeIn" delay={500} duration={1500} style={styles.poweredByContainer}>
+        <Animatable.View
+          animation="fadeIn"
+          delay={500}
+          duration={1500}
+          style={styles.poweredByContainer}
+        >
           <Text style={styles.poweredByText}>Powered By</Text>
           <Text style={styles.companyText}>ATOMS 360</Text>
         </Animatable.View>
 
         {/* Footer Text */}
-        <Animatable.View animation="fadeInUp" delay={1000} duration={1500} style={styles.footerTextContainer}>
+        <Animatable.View
+          animation="fadeInUp"
+          delay={1000}
+          duration={1500}
+          style={styles.footerTextContainer}
+        >
           <Text style={styles.footerText}>© All copyright's reserved</Text>
         </Animatable.View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingVertical: height * 0.05, // Adjust vertical padding based on screen height
+    backgroundColor: "#FFFFFF",
   },
   topSection: {
-    alignItems: 'center',
-    marginTop: height * 0.05, // Adjust top margin based on screen height
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: height * 0.05,
   },
   schoolContainer: {
-    alignItems: 'center',
-    marginBottom: height * 0.03, // Adjust bottom margin based on screen height
+    alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 20,
+    marginBottom: height * 0.04,
+  },
+  textWrapper: {
+    width: "100%",
+    alignItems: "center",
+    marginVertical: 2,
   },
   schoolText: {
-    fontSize: width * 0.06, // Adjust font size based on screen width
-    fontWeight: 'bold',
-    color: '#F48329',
-    marginBottom: height * 0.01, // Adjust bottom margin based on screen height
+    fontSize: Math.min(width * 0.055, 28),
+    fontWeight: "bold",
+    color: "#F48329",
+    textAlign: "center",
+    includeFontPadding: false,
+    padding: 2,
   },
   collegeText: {
-    fontSize: width * 0.06, // Adjust font size based on screen width
-    fontWeight: 'bold',
-    color: '#F48329',
+    fontSize: Math.min(width * 0.055, 28),
+    fontWeight: "bold",
+    color: "#F48329",
+    textAlign: "center",
+    includeFontPadding: false,
+    padding: 2,
   },
   centerLogosContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "100%",
+    paddingHorizontal: 20,
   },
-  logosColumn: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+  logosRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: width * 0.05,
   },
   logo: {
-    marginVertical: height * 0.02, // Adjust vertical margin based on screen height
+    width: finalLogoSize,
+    height: finalLogoSize,
   },
   bottomSection: {
-    alignItems: 'center',
-    marginBottom: height * 0.05, // Adjust bottom margin based on screen height
+    paddingBottom: height * 0.05,
+    alignItems: "center",
   },
   poweredByContainer: {
-    alignItems: 'center',
-    marginBottom: height * 0.02, // Adjust bottom margin based on screen height
+    alignItems: "center",
+    marginBottom: height * 0.02,
+    paddingHorizontal: 20,
   },
   poweredByText: {
-    fontSize: width * 0.045, // Adjust font size based on screen width
-    color: '#000000',
-    marginBottom: height * 0.01, // Adjust bottom margin based on screen height
+    fontSize: Math.min(width * 0.045, 24),
+    color: "#000000",
+    marginBottom: height * 0.01,
+    includeFontPadding: false,
   },
   companyText: {
-    fontSize: width * 0.055, // Adjust font size based on screen width
-    fontWeight: 'bold',
-    color: '#000000',
+    fontSize: Math.min(width * 0.055, 28),
+    fontWeight: "bold",
+    color: "#000000",
+    textAlign: "center",
+    includeFontPadding: false,
   },
   footerTextContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   footerText: {
-    fontSize: width * 0.03, // Adjust font size based on screen width
-    color: '#000000',
+    fontSize: Math.min(width * 0.03, 16),
+    color: "#000000",
+    includeFontPadding: false,
   },
 });
 
