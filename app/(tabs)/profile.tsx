@@ -46,8 +46,10 @@ const Profile = ({ navigation }: any) => {
         localProfile.soilType === "" ||
         localProfile.farmArea === "" ||
         localProfile.landRevenueSurveyNo == ""
-      )
+      ) {
+        Alert.alert("Please fill all the details.");
         return;
+      }
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -91,7 +93,6 @@ const Profile = ({ navigation }: any) => {
   const handleReferralSubmit = async () => {
     if (!session?.user.id && !localProfile) return;
     try {
-      console.log("Profile before accessing database", localProfile);
       const { error } = await supabase
         .from("profiles")
         .update({

@@ -12,9 +12,7 @@ export interface Prediction {
 }
 
 const URL =
-  Platform.OS === "android"
-    ? "https://smart-randomly-treefrog.ngrok-free.app/predict"
-    : "http://localhost:8000/predict";
+  "https://grapeai-b8exafafgafdbhgz.southindia-01.azurewebsites.net/predict";
 
 export const predictionResult = async (data: Prediction) => {
   try {

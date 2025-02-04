@@ -11,9 +11,7 @@ export interface Pest {
 }
 
 const URL =
-  Platform.OS === "android"
-    ? "https://smart-randomly-treefrog.ngrok-free.app/describe"
-    : "http://localhost:8000/describe";
+  "https://grapeai-b8exafafgafdbhgz.southindia-01.azurewebsites.net/describe";
 
 export const describePest = async (data: Pest) => {
   try {
