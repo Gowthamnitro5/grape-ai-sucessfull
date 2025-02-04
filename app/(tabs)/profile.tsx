@@ -11,6 +11,7 @@ import { Text, Card, TextInput, Button, useTheme } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import { useDataService } from "@/components/services/DataService";
 import { supabase } from "@/utils/supabase";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const Profile = ({ navigation }: any) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -41,7 +42,14 @@ const Profile = ({ navigation }: any) => {
   const handleSave = async () => {
     if (!session?.user.id && !localProfile) return;
     try {
-      console.log("Profile before accessing database", localProfile);
+      if (
+        localProfile.soilType === "" ||
+        localProfile.farmArea === "" ||
+        localProfile.landRevenueSurveyNo == ""
+      ) {
+        Alert.alert("Please fill all the details.");
+        return;
+      }
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -67,6 +75,7 @@ const Profile = ({ navigation }: any) => {
 
   const handleLogout = async () => {
     try {
+      await GoogleSignin.signOut();
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error(`Error : ${error}`);
@@ -84,7 +93,6 @@ const Profile = ({ navigation }: any) => {
   const handleReferralSubmit = async () => {
     if (!session?.user.id && !localProfile) return;
     try {
-      console.log("Profile before accessing database", localProfile);
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -112,7 +120,7 @@ const Profile = ({ navigation }: any) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Image
-        source={{ uri: "@/assets/images/grappy" }}
+        source={require("@/assets/images/grappy.jpg")}
         style={[styles.image, { height: isSmallScreen ? 150 : 200 }]}
       />
       <Card style={styles.card}>
@@ -151,14 +159,22 @@ const Profile = ({ navigation }: any) => {
               </Picker>
               <TextInput
                 label="Area of Farm (in acres)"
-                value={localProfile?.farmArea?.toString()} // Ensure it's a string
+                value={
+                  localProfile?.farmArea?.toString() ??
+                  userProfile?.farmArea?.toString() ??
+                  ""
+                } // Ensure it's a string
                 onChangeText={(text) => handleInputChange("farmArea", text)}
                 style={styles.input}
                 keyboardType="numeric"
               />
               <TextInput
                 label="Land Revenue Survey No"
-                value={localProfile?.landRevenueSurveyNo}
+                value={
+                  localProfile?.landRevenueSurveyNo ??
+                  userProfile?.landRevenueSurveyNo ??
+                  ""
+                }
                 onChangeText={(text) =>
                   handleInputChange("landRevenueSurveyNo", text)
                 }
@@ -167,14 +183,14 @@ const Profile = ({ navigation }: any) => {
               <View style={styles.row}>
                 <TextInput
                   label="GPS Latitude"
-                  value={localProfile?.latitude?.toString()} // Ensure it's a string
+                  value={localProfile?.latitude?.toString() ?? ""} // Ensure it's a string
                   onChangeText={(text) => handleInputChange("latitude", text)}
                   style={[styles.input, styles.halfWidth]}
                   keyboardType="numeric"
                 />
                 <TextInput
                   label="GPS Longitude"
-                  value={localProfile?.longitude?.toString()} // Ensure it's a string
+                  value={localProfile?.longitude?.toString() ?? ""} // Ensure it's a string
                   onChangeText={(text) => handleInputChange("longitude", text)}
                   style={[styles.input, styles.halfWidth]}
                   keyboardType="numeric"
@@ -182,7 +198,9 @@ const Profile = ({ navigation }: any) => {
               </View>
               <TextInput
                 label="Referral Code"
-                value={localProfile?.referralCode}
+                value={
+                  localProfile?.referralCode ?? userProfile?.referralCode ?? ""
+                }
                 onChangeText={(text) => handleInputChange("referralCode", text)}
                 style={styles.input}
               />

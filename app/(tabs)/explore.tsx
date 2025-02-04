@@ -41,41 +41,7 @@ const Explore = ({ navigation }: any) => {
   const { session, fetchProfile, fetchHistory } = useDataService();
 
   const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const prediction: Pest = await predictionResult(inputs);
-      if (prediction) {
-        console.log(prediction);
-        if (session?.user.id && prediction.disease) {
-          const { error } = await supabase.from("predictions").insert({
-            user_id: session.user.id,
-            disease: prediction.disease,
-          });
-          if (error) {
-            console.error(error.message);
-            Alert.alert("Database error", "Please try again later ...");
-            return;
-          }
-        }
-        await fetchProfile();
-        await fetchHistory();
-        navigation.navigate("output", { input: prediction });
-      } else {
-        Toast.show({
-          text1: "No Prediction Received",
-          text2: "Please check your input values and try again.",
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Prediction error:", error);
-      Alert.alert(
-        "Prediction Error",
-        "An error occurred while fetching the prediction. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
+    navigation.navigate("output", { input: inputs });
   };
 
   const getGuideline = (key: keyof typeof inputs): string => {
@@ -134,6 +100,7 @@ const Explore = ({ navigation }: any) => {
                   style={styles.input}
                   mode="outlined"
                   placeholder={getGuideline(key as keyof typeof inputs)}
+                  keyboardType="numeric"
                 />
                 <HelperText
                   type="info"

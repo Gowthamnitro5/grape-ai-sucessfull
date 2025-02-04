@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 export interface Prediction {
   solar_radiation: number;
   humidity: number;
@@ -10,7 +12,7 @@ export interface Prediction {
 }
 
 const URL =
-  "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/predict"; // Removed docs#/default for direct endpoint
+  "https://grapeai-b8exafafgafdbhgz.southindia-01.azurewebsites.net/predict";
 
 export const predictionResult = async (data: Prediction) => {
   try {
@@ -21,20 +23,20 @@ export const predictionResult = async (data: Prediction) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
+      // signal: AbortSignal.timeout(15000),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.log("API Error Data:", errorData);
       throw new Error(JSON.stringify(errorData));
     }
 
     const result = await response.json();
-    console.log("Prediction Result:", result); // Log the result for debugging
+    console.log(result); // Log the result for debugging
     return result;
   } catch (e: any) {
     console.error("Error during API call:", e.message || e);
-    throw new Error(e.message || e);
+    // throw new Error(e.message || e);
   }
 };
 

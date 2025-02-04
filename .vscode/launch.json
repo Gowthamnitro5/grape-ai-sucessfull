@@ -5,8 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "command": "npx expo start --android",
+      "command": "bun expo start",
       "name": "Expo- Tunnel",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
+      "command": "bun expo start -c -d",
+      "name": "Dev Client",
       "request": "launch",
       "type": "node-terminal"
     }

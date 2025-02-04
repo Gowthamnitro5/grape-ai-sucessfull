@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 export interface Pest {
   disease: string;
   flea_beetle: number;
@@ -9,7 +11,7 @@ export interface Pest {
 }
 
 const URL =
-  "https://grape-ai-ambqhxc9gyakgfa0.canadacentral-01.azurewebsites.net/describe"; // Direct endpoint URL
+  "https://grapeai-b8exafafgafdbhgz.southindia-01.azurewebsites.net/describe";
 
 export const describePest = async (data: Pest) => {
   try {
@@ -20,6 +22,7 @@ export const describePest = async (data: Pest) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
+      // signal: AbortSignal.timeout(15000),
     });
 
     if (!response.ok) {
@@ -29,7 +32,7 @@ export const describePest = async (data: Pest) => {
     }
 
     const result = await response.text();
-    console.log("Pest Description Result:", result); // Log the result for debugging
+    console.log("Pest Description Successful"); // Log the result for debugging
     return result;
   } catch (error: any) {
     console.error("Error during API call:", error.message || error);

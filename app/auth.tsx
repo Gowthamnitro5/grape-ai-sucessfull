@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { View, Text } from "react-native";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabase";
-//import UiAuth from "@/components/supabase/UiAuth";
 import BasicAuth from "@/components/supabase/BasicAuth";
 
 export default function Auth({ navigation }: any) {
