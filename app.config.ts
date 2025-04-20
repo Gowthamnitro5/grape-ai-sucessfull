@@ -1,0 +1,51 @@
+import { ExpoConfig, ConfigContext } from "@expo/config";
+
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  ...config,
+  name: "Grape AI",
+  slug: "grapeai",
+  version: "1.0.0",
+  orientation: "portrait",
+  icon: "./assets/images/grapeai.png",
+  scheme: "grapeai",
+  userInterfaceStyle: "automatic",
+  splash: {
+    image: "./assets/images/grapeai.png",
+    resizeMode: "contain",
+    backgroundColor: "#ffffff",
+  },
+  runtimeVersion: "1.0.0",
+  ios: {
+    supportsTablet: true,
+    bundleIdentifier: "com.gowtham23s.grapeai",
+  },
+  android: {
+    adaptiveIcon: {
+      foregroundImage: "./assets/images/grapeai.png",
+      backgroundColor: "#ffffff",
+    },
+    package: "com.gowtham23s.grapeai",
+  },
+  web: {
+    bundler: "metro",
+    output: "static",
+    favicon: "./assets/images/grapeai.png",
+  },
+  plugins: [
+    "expo-router",
+    "expo-font",
+    "@react-native-google-signin/google-signin",
+  ],
+  experiments: {
+    typedRoutes: true,
+  },
+  extra: {
+    eas: {
+      projectId: "7431c495-f4c5-4989-9ab8-62b036831188",
+    },
+  },
+  owner: "gowtham23s",
+  updates: {
+    url: "https://u.expo.dev/7431c495-f4c5-4989-9ab8-62b036831188",
+  },
+});

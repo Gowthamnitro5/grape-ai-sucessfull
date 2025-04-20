@@ -11,11 +11,12 @@ export interface Prediction {
   potassium: number;
 }
 
-const URL =
-  "https://grapeai-b8exafafgafdbhgz.southindia-01.azurewebsites.net/predict";
+const URL = `${process.env.EXPO_PUBLIC_API_URL}/predict`;
 
 export const predictionResult = async (data: Prediction) => {
   try {
+    console.log(process.env);
+    if (URL === undefined) throw new Error("API URL is not defined");
     const response = await fetch(URL, {
       method: "POST",
       mode: "cors",

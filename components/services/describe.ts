@@ -10,11 +10,12 @@ export interface Pest {
   leaf_eating_caterpillar: number;
 }
 
-const URL =
-  "https://grapeai-b8exafafgafdbhgz.southindia-01.azurewebsites.net/describe";
+const URL = `${process.env.EXPO_PUBLIC_API_URL}/describe`;
 
 export const describePest = async (data: Pest) => {
   try {
+    console.log(process.env);
+    if (URL === undefined) throw new Error("API URL is not defined");
     const response = await fetch(URL, {
       method: "POST",
       mode: "cors",

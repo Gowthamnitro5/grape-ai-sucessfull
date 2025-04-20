@@ -104,6 +104,10 @@ const OutputScreen = ({ route, navigation }: Props) => {
               )
               .join("")}
           </div>
+          <div class="card">
+            <h2 class="card-title">Detailed Analysis</h2>
+            ${llmAnalysis}
+          </div>
         </body>
       </html>
     `;
@@ -113,7 +117,9 @@ const OutputScreen = ({ route, navigation }: Props) => {
 
   const SavePrediction = async () => {
     try {
-      fileUri = FileSystem.documentDirectory + `generated.pdf`;
+      fileUri =
+        FileSystem.documentDirectory +
+        ` ${new Date().toLocaleTimeString()}.pdf`;
 
       if (Platform.OS === "android") {
         const { uri } = await Print.printToFileAsync({

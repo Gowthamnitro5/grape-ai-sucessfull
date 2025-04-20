@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 8,
-    paddingBottom: 80,
+    paddingBottom: 150,
   },
   gridItem: {
     padding: 8,
